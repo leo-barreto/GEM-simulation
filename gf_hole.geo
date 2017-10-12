@@ -1,8 +1,8 @@
 //Default Parameters
 x0 = 0; y0 = 0; z0 = 0;  // Centre
-R = 1;     // Radius
-T = 1;     // Thickness
-R_O = 0.3;   // Outer Radius
+R = 1;                   // Radius
+T = 1;                   // Thickness
+R_O = 0.3;               // Outer Radius
 lc = 0.03;
 A = 0;
 

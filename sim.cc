@@ -44,7 +44,7 @@ int main(int argc, char * argv[]) {
 
 
     // Electron Start Parameters
-    const double zi = 0.01;
+    const double zi = 0.;
     double xi = 0.;
     double yi = H / 2;
 
@@ -69,7 +69,7 @@ int main(int argc, char * argv[]) {
     vF -> SetCanvas(cFie);
     vF -> SetComponent(elm);
     vF -> SetPlane(0, -1, 0, 0, H / 2, 0);
-    vF -> SetArea(-DIST / 2, -3 * T_DIE, DIST / 2, 3 * T_DIE);
+    vF -> SetArea(-0.5 * DIST, -2 * T_DIE, 0.5 * DIST, 2 * T_DIE);
     //vF -> SetNumberOfContours(80);
     //vF -> SetNumberOfSamples2d(60, 60);
     vF -> SetVoltageRange(-900., 0.);
@@ -141,7 +141,7 @@ int main(int argc, char * argv[]) {
     vFE -> SetComponent(elm);
     vFE -> SetPlane(0, -1, 0, 0, H / 2, 0);
     vFE -> SetFillMesh(true);
-    vFE -> SetColor(1, kGray);
+    vFE -> SetColor(1, kCyan - 3);
     vFE -> SetColor(2, kOrange + 7);
     vFE -> SetColor(3, kOrange + 7);
     vFE -> EnableAxes();
@@ -159,8 +159,8 @@ int main(int argc, char * argv[]) {
     // Plotting
     vFE -> SetViewDrift(vDrift);
     vFE -> Plot();
-    
-    
+
+
 
 
     auto t_end = std::chrono::high_resolution_clock::now();

@@ -99,7 +99,7 @@ int main(int argc, char * argv[]) {
   }
   std::cout << "\n... avalanche complete with " <<
   np << " electron tracks." << std::endl;
-/*
+
   // Plotting
   TCanvas* ue = new TCanvas();
   driftView -> SetCanvas(ue);
@@ -121,7 +121,7 @@ int main(int argc, char * argv[]) {
   vFE -> SetYaxisTitle("z (cm)");
   vFE -> SetArea(-1.5 * DIST, -3 * T_DIE, 0., 1.5 * DIST, z0, 0.);
   vFE -> SetViewDrift(driftView);
-  vFE -> Plot();*/
+  vFE -> Plot();
 
   auto t_end = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> diff = t_end - t_start;

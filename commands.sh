@@ -1,7 +1,7 @@
 #!/bin/bash
 gmsh gem.geo -3 -order 2 -optimize;
 echo "==============================================";
-ElmerGrid 14 2 gem.msh -autoclean;
+ElmerGrid 14 2 gem.msh -autoclean -centralize;
 echo "==============================================";
 cd ./gem;
 ElmerSolver gem.sif;

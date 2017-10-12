@@ -1,9 +1,9 @@
 //Default Parameters
 x0 = 0; y0 = 0; z0 = 0;  // Centre
-R = 1;     // Radius
-D = 3;     // Hole Distace
-T = 1;     // Thickness
-R_O = 0;   // Outer Radius
+R = 1;                   // Radius
+D = 3;                   // Hole Distace
+T = 1;                   // Thickness
+R_O = 0;                 // Outer Radius
 lc = 0.03;
 
 Function gf_gplane
@@ -11,7 +11,7 @@ Function gf_gplane
   R_M = R - R_O;
   H = Sqrt(3) * D / 2;
 
-// Points
+  // Points
   p1 = newp; Point(p1) = {x0, y0 - R + H / 2, z0, lc};
   p2 = newp; Point(p2) = {x0, y0 + H / 2, z0, lc};
   p3 = newp; Point(p3) = {x0 - R, y0 + H / 2, z0, lc};
@@ -52,7 +52,7 @@ Function gf_gplane
   p36 = newp; Point(p36) = {x0 + R, y0 + H / 2, z0 - T, lc};
 
 
-// Lines
+  // Lines
   c1 = newc; Circle(c1) = {p1, p2, p3};
   l1 = newl; Line(l1) = {p3, p4};
   l2 = newl; Line(l2) = {p4, p5};
@@ -110,7 +110,7 @@ Function gf_gplane
   l39 = newl; Line(l39) = {p24, p36};
 
 
-// Line Loops
+  // Line Loops
   ll1 = newll; Line Loop(ll1) = {c1, l1, l2, c2, l3, c3, l4, l5, c4};
   ll2 = newll; Line Loop(ll2) = {c1, l18, -c5, -l16};
   ll3 = newll; Line Loop(ll3) = {l1, l19, -l6, -l18};
@@ -134,7 +134,7 @@ Function gf_gplane
   ll20 = newll; Line Loop(ll20) = {c9, l11, l12, c10, l13, c11, l14, l15, c12};
 
 
-// Surfaces
+  // Surfaces
   s1 = news; Plane Surface(s1) = {ll1};
   s2 = news; Ruled Surface(s2) = {ll2};
   s3 = news; Plane Surface(s3) = {ll3};
@@ -162,5 +162,6 @@ Function gf_gplane
                        s11, s12, s13, s14, s15,s16, s17, s18, s19, s20};
 
   v = newv; Volume(v) = {sl};
+
 
   Return
