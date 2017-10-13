@@ -35,11 +35,11 @@ int main(int argc, char * argv[]) {
   double z0 = 0.02;
 
   // Import
-  ComponentElmer* elm = new ComponentElmer("gem/mesh.header",
-                                           "gem/mesh.elements",
-                                           "gem/mesh.nodes",
-                                           "gem/dielectrics.dat",
-                                           "gem/gem.result", "mm");
+  ComponentElmer* elm = new ComponentElmer("gem70_140/mesh.header",
+                                           "gem70_140/mesh.elements",
+                                           "gem70_140/mesh.nodes",
+                                           "gem70_140/dielectrics.dat",
+                                           "gem70_140/gem.result", "mm");
   elm -> EnablePeriodicityX();
   elm -> EnableMirrorPeriodicityY();
   elm -> PrintRange();
@@ -90,13 +90,13 @@ int main(int argc, char * argv[]) {
   int status;
   aval -> AvalancheElectron(x0, y0, z0, 0, 0, 0., 0., 0.);
   const int np = aval -> GetNumberOfElectronEndpoints();
-
+/*
   for (int i = np; i--;) {
     aval -> GetElectronEndpoint(i, xe1, ye1, ze1, te1,
                                 e1, xe2, ye2, ze2, te2,
                                 e2, status);
     drift -> DriftIon(xe1, ye1, ze1, te1);
-  }
+  }*/
   std::cout << "\n... avalanche complete with " <<
   np << " electron tracks." << std::endl;
 
@@ -125,7 +125,7 @@ int main(int argc, char * argv[]) {
 
   auto t_end = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> diff = t_end - t_start;
-  std::cout << "\nEND OF SIMULATION: " << diff.count() << " s.\n"<< std::endl;
+  std::cout << "\n... END OF SIMULATION: " << diff.count() << " s.\n"<< std::endl;
 
   app.Run(kTRUE);
 }

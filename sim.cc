@@ -157,8 +157,8 @@ int main(int argc, char * argv[]) {
 
 
     // Plotting
-    vFE -> SetViewDrift(vDrift);
-    vFE -> Plot();
+    //vFE -> SetViewDrift(vDrift);
+    //vFE -> Plot();
 
 
 

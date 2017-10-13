@@ -34,7 +34,7 @@ h_str = str(int(DISTANCE_HOLES * 1000))
 geo_name = 'gem' + d_str + '_' + h_str
 if GEN_GEOMETRY:
     geo_file = open(geo_name + '.geo', 'w')
-    
+
     geo_file.write('Include "gf_gem.geo";\n')
     geo_file.write('RADIUS = ' + str(RADIUS) + ';\n')
     geo_file.write('DISTANCE_HOLES = ' + str(DISTANCE_HOLES) + ';\n')
@@ -45,30 +45,30 @@ if GEN_GEOMETRY:
     geo_file.write('DISTANCE_ELE = ' + str(DISTANCE_ELE) + ';\n')
     geo_file.write('Call gf_gem;')
     geo_file.close()
-    
+
     print('\nMeshing Geometry...')
     os.system('gmsh ' + geo_name + '.geo -3 -order 2 -optimize')
-    
+
     print('\nConverting to Elmer...')
     os.system('ElmerGrid 14 2 ' + geo_name + '.msh -autoclean -centralize')
-    
+
     print('\nDeleting Files...')
     os.system('rm ' + geo_name + '.geo ' + geo_name + '.msh')
 
 if GEN_FIELDS:
     print('\nWriting dieletrics.dat...')
-    dieletric = open(geo_name + '/' + 'dieletrics.dat', 'w')
-    dieletric.write('''4
+    dielectric = open(geo_name + '/' + 'dielectrics.dat', 'w')
+    dielectric.write('''4
 1 1
 2 ''' + str(PERMITTIVITY_DIE) + '''
-3 1e10 0
-4 1e10 0''')
-    dieletric.close()
-    
+3 1e10
+4 1e10''')
+    dielectric.close()
+
     print('\nWriting .sif...')
     sif = open(geo_name + '/' + 'gem.sif', 'w')
     WTsif = open(geo_name + '/' + 'gemWT.sif', 'w')
-        
+
     sif.write('''Header
   CHECK KEYWORDS Warn
   Mesh DB "." "."
@@ -324,44 +324,17 @@ Boundary Condition 10
   Target Boundaries = 4
   Periodic BC = 9
 End''')
-    
+
     WTsif.close()
-    
+
     print('\nSolving Main Field...')
     os.chdir('./' + geo_name)
     os.system('ElmerSolver gem.sif')
     print('\nSolving WT Field...')
     os.system('ElmerSolver gemWT.sif')
     os.chdir('..')
-    
-    
-    
-time = time.time() - start    
+
+
+
+time = time.time() - start
 print('\n\nDONE! (in %.2f seconds)' % time)
-    
-
-
-        
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
-
