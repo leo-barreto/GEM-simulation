@@ -91,13 +91,13 @@ int main(int argc, char * argv[]) {
   int status;
   aval -> AvalancheElectron(x0, y0, z0, 0, 0, 0., 0., 0.);
   const int np = aval -> GetNumberOfElectronEndpoints();
-/*
+
   for (int i = np; i--;) {
     aval -> GetElectronEndpoint(i, xe1, ye1, ze1, te1,
                                 e1, xe2, ye2, ze2, te2,
                                 e2, status);
     drift -> DriftIon(xe1, ye1, ze1, te1);
-  }*/
+  }
   std::cout << "\n... avalanche complete with " <<
   np << " electron tracks." << std::endl;
 
