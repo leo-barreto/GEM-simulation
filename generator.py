@@ -19,9 +19,9 @@ DISTANCE_PAD = 1.
 DISTANCE_ELE = 1.
 
 # Electric Field in V/cm; Potential in V.
-E_DIFF = 1000
-E_IND = 3000
-DELTA_V = 500
+E_DIFF = 230
+E_IND = 4000
+DELTA_V = 380
 PERMITTIVITY_DIE = 3.23 #relative
 
 
@@ -31,7 +31,8 @@ start = time.time()
 # Geometry Generation
 d_str = str(int(RADIUS * 2000))
 h_str = str(int(DISTANCE_HOLES * 1000))
-geo_name = 'gem' + d_str + '_' + h_str
+v_str = str(int(DELTA_V))
+geo_name = 'gem' + d_str + '_' + h_str + '_' + v_str
 if GEN_GEOMETRY:
     geo_file = open(geo_name + '.geo', 'w')
 
@@ -54,6 +55,7 @@ if GEN_GEOMETRY:
 
     print('\nDeleting Files...')
     os.system('rm ' + geo_name + '.geo ' + geo_name + '.msh')
+
 
 if GEN_FIELDS:
     print('\nWriting dieletrics.dat...')

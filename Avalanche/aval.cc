@@ -24,7 +24,7 @@ int main(int argc, char * argv[]) {
   // GEM Dimensions in cm
   const double T_DIE = 0.005;              // Dieletric Thickness
   const double T_PLA = 0.0005;             // Plates Thickness
-  const double DIST = 0.014;              // Distance Between Holes
+  const double DIST = 0.014;               // Distance Between Holes
   const double H = sqrt(3) * DIST / 2;     // Height
   const double D_E = 0.1;                  // Distance to Electrode
   const double D_P = 0.1;                  // Distance to Pad
@@ -34,12 +34,13 @@ int main(int argc, char * argv[]) {
   double y0 = 0.;
   double z0 = 0.02;
 
+
   // Import
-  ComponentElmer* elm = new ComponentElmer("gem70_140/mesh.header",
-                                           "gem70_140/mesh.elements",
-                                           "gem70_140/mesh.nodes",
-                                           "gem70_140/dielectrics.dat",
-                                           "gem70_140/gem.result", "mm");
+  ComponentElmer* elm = new ComponentElmer("gem70_140_380/mesh.header",
+                                           "gem70_140_380/mesh.elements",
+                                           "gem70_140_380/mesh.nodes",
+                                           "gem70_140_380/dielectrics.dat",
+                                           "gem70_140_380/gem.result", "mm");
   elm -> EnablePeriodicityX();
   elm -> EnableMirrorPeriodicityY();
   elm -> PrintRange();
@@ -66,7 +67,7 @@ int main(int argc, char * argv[]) {
   // Sensor.
   Sensor* sensor = new Sensor();
   sensor -> AddComponent(elm);
-  sensor -> SetArea(-5 * DIST, -5 * DIST, -0.02, 5 * DIST, 5 * DIST, z0);
+  sensor -> SetArea(-5 * DIST, -5 * DIST, -0.02, 5 * DIST, 5 * DIST, z0 + 0.01);
 
   // Avalanche and Drift Setup
   AvalancheMicroscopic* aval = new AvalancheMicroscopic();

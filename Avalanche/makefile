@@ -17,11 +17,6 @@ LDFLAGS = `root-config --glibs` -lGeom -lgfortran -lm
 LDFLAGS += -L$(LIBDIR) -lGarfield
 # LDFLAGS += -g
 
-#sim: sim.cc
-	#$(CXX) $(CFLAGS) sim.cc
-	#$(CXX) -o sim sim.o $(LDFLAGS)
-	#rm sim.o
-
 aval: aval.cc
 	$(CXX) $(CFLAGS) aval.cc
 	$(CXX) -o aval aval.o $(LDFLAGS)

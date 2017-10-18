@@ -1,32 +1,3 @@
-// *********************************************************************
-// gf_rectangle.geo
-// -----------------
-// A rectangle.
-//
-// ---------------------------------------------------------------------
-// Parameters
-// ---------------------------------------------------------------------
-// x0: x position of center
-// y0: y position of center
-// z0: z position of center
-// lc: characteristic length
-// l: length
-// w: width
-// h: height
-//
-// ---------------------------------------------------------------------
-// Return Values
-// ---------------------------------------------------------------------
-// vol: the ID of the inner volume
-// s1: ID of surface 1: normal -x
-// s2: ID of surface 2: normal +y
-// s3: ID of surface 3: normal +x
-// s4: ID of surface 4: normal -y
-// s5: ID of surface 5: normal +z
-// s6: ID of surface 6: normal -z
-//
-// *********************************************************************
-
 // Default parameters
 x0 = 0;
 y0 = 0;
