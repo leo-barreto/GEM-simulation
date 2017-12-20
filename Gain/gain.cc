@@ -30,7 +30,7 @@ int main(int argc, char * argv[]) {
 
   const double Z_AXIS = -1 * (D_P + T_DIE / 2 + T_PLA);
   const double Z0 = 0.05;
-  const int N_AVAL = 20;
+  const int N_AVAL = 10;
 
 
   // Import
@@ -62,11 +62,12 @@ int main(int argc, char * argv[]) {
   // Avalanche and Drift Setup
   AvalancheMicroscopic* aval = new AvalancheMicroscopic();
   aval -> SetSensor(sensor);
-  aval -> EnableAvalancheSizeLimit(1000);
+  aval -> EnableAvalancheSizeLimit(10);
 
   // Avalanches Calculations
-  std::vector<int> gain_r = {};
-  std::vector<int> gain_e = {};
+  std::vector<int> number_p = {};
+  std::vector<int> number_e = {};
+  std::vector<int> number_i = {};
   for (int i = N_AVAL; i--;) {
     // Random Initial Positions
     double x0 = (2 * RndmUniform() - 1) * DIST / 2;
@@ -78,16 +79,20 @@ int main(int argc, char * argv[]) {
 
     std::cout << "\n" << N_AVAL -  i << "/" << N_AVAL;
     std::cout << "\n... avalanche complete with " <<
-              np << " electron tracks. (size " << ne << ")" << std::endl;
-    gain_r.push_back(np);
-    gain_e.push_back(ne);
+              np << " electron tracks. (number of electrons " << ne << ")" << std::endl;
+    number_p.push_back(np);
+    number_e.push_back(ne);
+    number_i.push_back(ni);
   }
 
- double mean_r = TMath::Mean(gain_r.begin(), gain_r.end());
- std::cout << "\n\n... Mean End Points: " << mean_r << std::endl;
+ double mean_p = TMath::Mean(number_p.begin(), number_p.end());
+ std::cout << "\n\n... Mean End Points: " << mean_p << std::endl;
 
- double mean_e = TMath::Mean(gain_e.begin(), gain_e.end());
- std::cout << "\n... Mean Avalanche Size: " << mean_e << std::endl;
+ double mean_e = TMath::Mean(number_e.begin(), number_e.end());
+ std::cout << "\n... Mean Electron Number: " << mean_e << std::endl;
+
+ double mean_i = TMath::Mean(number_i.begin(), number_i.end());
+ std::cout << "\n... Mean Ion Number: " << mean_i << std::endl;
 
  auto t_end = std::chrono::high_resolution_clock::now();
  std::chrono::duration<double> diff = t_end - t_start;

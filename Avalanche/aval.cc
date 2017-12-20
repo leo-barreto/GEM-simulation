@@ -64,7 +64,7 @@ int main(int argc, char * argv[]) {
   const std::string path = getenv("GARFIELD_HOME");
   gas -> LoadIonMobility(path + "/Data/IonMobility_Ar+_Ar.txt");
 
-  // Sensor.
+  // Sensor
   Sensor* sensor = new Sensor();
   sensor -> AddComponent(elm);
   sensor -> SetArea(-5 * DIST, -5 * DIST, -0.02, 5 * DIST, 5 * DIST, z0 + 0.01);
