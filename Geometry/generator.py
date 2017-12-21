@@ -21,7 +21,7 @@ DISTANCE_ELE = 1.
 # Electric Field in V/cm; Potential in V.
 E_DIFF = 1000
 E_IND = 3000
-DELTA_V = 500
+DELTA_V = 300
 PERMITTIVITY_DIE = 3.23 #relative
 
 
