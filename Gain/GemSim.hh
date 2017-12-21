@@ -1,11 +1,17 @@
+#ifndef GEMSIM_H
+#define GEMSIM_H
+
+
 #include <iostream>
 #include <fstream>
 #include <chrono>
+#include <string>
 
 #include <TApplication.h>
 #include <TMath.h>
 #include <TH1F.h>
 #include <TCanvas.h>
+#include <TFile.h>
 
 #include "ComponentElmer.hh"
 #include "MediumMagboltz.hh"
@@ -17,34 +23,50 @@
 
 using namespace Garfield;
 
-int main(int argc, char * argv[]) {
+void SetupInfo(double gem[9], std::string folder, double up, double low,
+               double t_die, double t_pla, double i_field, double d_field) {
+
+ // Dimensions in cm, Fields in V/cm and Potentials in V
+ gem[0] = std::stod(folder.substr(3, 5)) / 10000;    // Hole Diameter
+ gem[1] = std::stod(folder.substr(6, 9)) / 10000;    // Distance between Holes
+ gem[2] = up;                                        // Distance to Electrode
+ gem[3] = low;                                       // Distance to Pad
+ gem[4] = t_die;                                     // Dieletric Thickness
+ gem[5] = t_pla;                                     // Plates Thickness
+ gem[6] = i_field;                                   // Induction Field
+ gem[7] = d_field;                                   // Drift Field
+ gem[8] = std::stod(folder.substr(10, 13));          // GEM Potential
+
+ std::cout << "\nSetup information collected." << std::endl;
+}
+
+
+void GainOneElectron(std::string folder, double info[9],
+                     double electron_pos, int n_events) {
 
   auto t_start = std::chrono::high_resolution_clock::now();
   TApplication app("app", &argc, argv);
 
 
   // GEM Dimensions in cm
-  const double T_DIE = 0.005;              // Dieletric Thickness
-  const double T_PLA = 0.0005;             // Plates Thickness
-  const double DIST = 0.014;               // Distance Between Holes
-  const double H = sqrt(3) * DIST / 2;     // Height
-  const double D_E = 0.1;                  // Distance to Electrode
-  const double D_P = 0.1;                  // Distance to Pad
+  const double T_DIE = info[4];
+  const double T_PLA = info[5];
+  const double DIST = info [1];
+  const double H = sqrt(3) * DIST / 2;
+  const double D_E = info[2];
+  const double D_P = info[3];
 
   const double Z_AXIS = -1 * (D_P + T_DIE / 2 + T_PLA);
-  const double Z0 = 0.05;
-  const int N_AVAL = 1000;
 
 
   // Import
-  ComponentElmer* elm = new ComponentElmer("gem70_140_500/mesh.header",
-                                           "gem70_140_500/mesh.elements",
-                                           "gem70_140_500/mesh.nodes",
-                                           "gem70_140_500/dielectrics.dat",
-                                           "gem70_140_500/gem.result", "mm");
+  ComponentElmer* elm = new ComponentElmer(folder + "/mesh.header",
+                                           folder + "/mesh.elements",
+                                           folder + "/mesh.nodes",
+                                           folder + "/dielectrics.dat",
+                                           folder + "/gem.result", "mm");
   elm -> EnablePeriodicityX();
   elm -> EnableMirrorPeriodicityY();
-  //elm -> SetWeightingField("gem70_140_500/gemWT.result", "wt");
 
 
   // Medium
@@ -63,7 +85,7 @@ int main(int argc, char * argv[]) {
   // Sensor.
   Sensor* sensor = new Sensor();
   sensor -> AddComponent(elm);
-  sensor -> SetArea(-DIST, -H, Z_AXIS, DIST, H, Z0 + 0.01);
+  sensor -> SetArea(-DIST, -H, Z_AXIS, DIST, H, electron_pos + 0.01);
 
 
   // Avalanche and Drift Setup
@@ -121,25 +143,38 @@ int main(int argc, char * argv[]) {
               << ne << ")" << std::endl;
 
     std::cout << "\n... nf: " << nf << ", n_other: " << n_other << std::endl;
- }
+  }
 
 
- // Plotting
- TCanvas* cH = new TCanvas("cH", "Histograms", 800, 400);
- cH -> Divide(2,2);
- cH -> cd(1);
- hRGain -> Draw();
- cH -> cd(2);
- hEGain -> Draw();
- cH -> cd(3);
- h0RGain -> Draw();
- cH -> cd(4);
- h0EGain -> Draw();
+  // Plotting
+  TCanvas* cH = new TCanvas("cH", "Histograms", 800, 400);
+  cH -> Divide(2,2);
+  cH -> cd(1);
+  hRGain -> Draw();
+  cH -> cd(2);
+  hEGain -> Draw();
+  cH -> cd(3);
+  h0RGain -> Draw();
+  cH -> cd(4);
+  h0EGain -> Draw();
 
 
- auto t_end = std::chrono::high_resolution_clock::now();
- std::chrono::duration<double> diff = t_end - t_start;
- std::cout << "\n... END OF SIMULATION: " << diff.count() << " s.\n"<< std::endl;
+  auto t_end = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> diff = t_end - t_start;
+  std::cout << "\n... END OF SIMULATION: " << diff.count() << " s.\n"<< std::endl;
 
- app.Run(kTRUE);
+  app.Run(kTRUE);
+
+
+
+
+
+
+
+
 }
+
+
+
+
+#endif
