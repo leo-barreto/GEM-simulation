@@ -50,15 +50,15 @@ void SetupInfo(double gem[9], std::string folder, double up, double low,
 }
 
 
-void GainOneElectron(std::string folder, double info[9], bool showhist = true,
-                     double electron_pos = 0.05, int n_events = 100,
-                     int sizelimit = 10, bool penning = true) {
+void GainOneElectron(std::string folder, double info[9], bool plot = true,
+                     int sizelimit = 10, int n_events = 100,
+                     double electron_pos = 0.05, bool penning = true) {
 
   auto t_start = std::chrono::high_resolution_clock::now();
 
   // Input Confirmation
   std::cout << "Inputs for Gain Calculation:" << std::endl;
-  std::cout << "    Show Histograms: " << showhist << std::endl;
+  std::cout << "    Show Histograms: " << plot << std::endl;
   std::cout << "    Number of Avalanches: " << n_events << std::endl;
   std::cout << "    Avalanche Size Limit: " << sizelimit << std::endl;
   std::cout << "    Penning Transfer: " << penning << std::endl;
@@ -177,22 +177,34 @@ void GainOneElectron(std::string folder, double info[9], bool showhist = true,
   }
 
 
+  // Saving Histograms
+  TFile* f = new TFile("hists.root", "NEW");
+  hRGain -> Write();
+  hEGain -> Write();
+  h0RGain -> Write();
+  h0RGain -> Write();
+  f -> Close();
+
+
   // Plotting
-  TCanvas* cH = new TCanvas("cH", "Histograms", 800, 400);
-  cH -> Divide(2,2);
-  cH -> cd(1);
-  hRGain -> Draw();
-  cH -> cd(2);
-  hEGain -> Draw();
-  cH -> cd(3);
-  h0RGain -> Draw();
-  cH -> cd(4);
-  h0EGain -> Draw();
+  if (plot == true) {
+    TCanvas* cH = new TCanvas("cH", "Histograms", 800, 400);
+    cH -> Divide(2,2);
+    cH -> cd(1);
+    hRGain -> Draw();
+    cH -> cd(2);
+    hEGain -> Draw();
+    cH -> cd(3);
+    h0RGain -> Draw();
+    cH -> cd(4);
+    h0EGain -> Draw();
+  }
+
 
 
   auto t_end = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> diff = t_end - t_start;
-  std::cout << "\n... END OF GAIN CALCULATION: "
+  std::cout << "\n\n... END OF GAIN CALCULATION: "
             << diff.count() << " s.\n"<< std::endl;
 
 
