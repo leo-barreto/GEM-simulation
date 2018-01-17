@@ -126,13 +126,11 @@ void GainOneElectron(std::string folder, double info[9], bool plot = true,
 
   // Histograms
   int nBins = 100;
-  float hmin = 0.;
-  float hmax = 500.;
+  float hmin = 1.;
+  float hmax = 100.;
 
   TH1F* hRGain = new TH1F("hRGain", "Real Gain", nBins, hmin, hmax);
   TH1F* hEGain = new TH1F("hEGain", "Effective Gain", nBins, hmin, hmax);
-  TH1F* h0RGain = new TH1F("h0RGain", "Real Gain 0", nBins, hmin, hmax);
-  TH1F* h0EGain = new TH1F("h0EGain", "Effective Gain 0", nBins, hmin, hmax);
 
   // Avalanches Calculations
   for (int i = n_events; i--;) {
@@ -162,10 +160,6 @@ void GainOneElectron(std::string folder, double info[9], bool plot = true,
 
     hRGain -> Fill(np);
     hEGain -> Fill(nf);
-    if (nf > 0) {
-      h0RGain -> Fill(np);
-      h0EGain -> Fill(nf);
-    }
 
     std::cout << "\n" << n_events -  i << "/" << n_events;
     std::cout << "\n... avalanche complete with " << np
@@ -178,27 +172,24 @@ void GainOneElectron(std::string folder, double info[9], bool plot = true,
 
 
   // Saving Histograms
-  TFile* f = new TFile("hists.root", "NEW");
+  std::string title = folder + "_hists.root";
+  const char* f_title = title.c_str();
+  TFile* f = new TFile(f_title, "RECREATE");
   hRGain -> Write();
   hEGain -> Write();
-  h0RGain -> Write();
-  h0RGain -> Write();
   f -> Close();
 
 
   // Plotting
   if (plot == true) {
-    TCanvas* cH = new TCanvas("cH", "Histograms", 800, 400);
-    cH -> Divide(2,2);
-    cH -> cd(1);
-    hRGain -> Draw();
-    cH -> cd(2);
-    hEGain -> Draw();
-    cH -> cd(3);
-    h0RGain -> Draw();
-    cH -> cd(4);
-    h0EGain -> Draw();
-  }
+     TCanvas* cH = new TCanvas("cH", "Histograms", 800, 400);
+     cH -> Divide(2,1);
+     cH -> cd(1);
+     hRGain -> Draw();
+     cH -> cd(2);
+     hEGain -> Draw();
+   }
+
 
 
 
@@ -207,10 +198,6 @@ void GainOneElectron(std::string folder, double info[9], bool plot = true,
   std::cout << "\n\n... END OF GAIN CALCULATION: "
             << diff.count() << " s.\n"<< std::endl;
 
-
 }
-
-
-
 
 #endif
