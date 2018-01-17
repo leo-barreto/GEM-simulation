@@ -37,16 +37,33 @@ void SetupInfo(double gem[9], std::string folder, double up, double low,
  gem[7] = d_field;                                   // Drift Field
  gem[8] = std::stod(folder.substr(10, 13));          // GEM Potential
 
- std::cout << "\nSetup information collected." << std::endl;
+ std::cout << "\nSetup information collected:" << std::endl;
+ std::cout << "    Hole Diameter: " << gem[0] << " cm" << std::endl;
+ std::cout << "    Distance between Holes: " << gem[1] << " cm" << std::endl;
+ std::cout << "    Distance to Electrode: " << gem[2] << " cm" << std::endl;
+ std::cout << "    Distance to Pad: " << gem[3] << " cm" << std::endl;
+ std::cout << "    Dieletric Thickness: " << gem[4] << " cm" << std::endl;
+ std::cout << "    Plates Thickness: " << gem[5] << " cm" << std::endl;
+ std::cout << "    Induction Field: " << gem[6] << " V/cm" << std::endl;
+ std::cout << "    Drift Field: " << gem[7] << " V/cm" << std::endl;
+ std::cout << "    GEM Potential: " << gem[8] << " V\n" << std::endl;
 }
 
 
-void GainOneElectron(std::string folder, double info[9],
-                     double electron_pos, int n_events) {
+void GainOneElectron(std::string folder, double info[9], bool showhist = true,
+                     double electron_pos = 0.05, int n_events = 100,
+                     int sizelimit = 10, bool penning = true) {
 
   auto t_start = std::chrono::high_resolution_clock::now();
-  TApplication app("app", &argc, argv);
 
+  // Input Confirmation
+  std::cout << "Inputs for Gain Calculation:" << std::endl;
+  std::cout << "    Show Histograms: " << showhist << std::endl;
+  std::cout << "    Number of Avalanches: " << n_events << std::endl;
+  std::cout << "    Avalanche Size Limit: " << sizelimit << std::endl;
+  std::cout << "    Penning Transfer: " << penning << std::endl;
+  std::cout << "    Initial Electron Position in Z: " << electron_pos
+            << " cm\n" << std::endl;
 
   // GEM Dimensions in cm
   const double T_DIE = info[4];
@@ -79,6 +96,14 @@ void GainOneElectron(std::string folder, double info[9],
   gas -> EnableDebugging();
   gas -> Initialise();
   gas -> DisableDebugging();
+  if (penning) {
+    const double rPenning = 0.57;
+    const double lambdaPenning = 0.;
+    gas -> EnablePenningTransfer(rPenning, lambdaPenning, "ar");
+  }
+  else {
+    gas -> DisablePenningTransfer();
+  }
   elm -> SetMedium(0, gas);
 
 
@@ -91,13 +116,18 @@ void GainOneElectron(std::string folder, double info[9],
   // Avalanche and Drift Setup
   AvalancheMicroscopic* aval = new AvalancheMicroscopic();
   aval -> SetSensor(sensor);
-  aval -> EnableAvalancheSizeLimit(10);
+  if (sizelimit > 0) {
+    aval -> EnableAvalancheSizeLimit(sizelimit);
+  }
+  else {
+    aval -> DisableAvalancheSizeLimit();
+  }
 
 
   // Histograms
   int nBins = 100;
   float hmin = 0.;
-  float hmax = 50.;
+  float hmax = 500.;
 
   TH1F* hRGain = new TH1F("hRGain", "Real Gain", nBins, hmin, hmax);
   TH1F* hEGain = new TH1F("hEGain", "Effective Gain", nBins, hmin, hmax);
@@ -105,11 +135,11 @@ void GainOneElectron(std::string folder, double info[9],
   TH1F* h0EGain = new TH1F("h0EGain", "Effective Gain 0", nBins, hmin, hmax);
 
   // Avalanches Calculations
-  for (int i = N_AVAL; i--;) {
+  for (int i = n_events; i--;) {
     // Random Initial Positions
     double x0 = (2 * RndmUniform() - 1) * DIST / 2;
     double y0 = (2 * RndmUniform() - 1) * DIST / 2;
-    aval -> AvalancheElectron(x0, y0, Z0, 0, 0, 0., 0., 0.);
+    aval -> AvalancheElectron(x0, y0, electron_pos, 0, 0, 0., 0., 0.);
     int np = aval -> GetNumberOfElectronEndpoints();
     int ne = 0, ni = 0, nf = 0, n_other = 0;
     aval -> GetAvalancheSize(ne, ni);
@@ -121,7 +151,7 @@ void GainOneElectron(std::string folder, double info[9],
     for (int j = np; j--;) {
       aval -> GetElectronEndpoint(j, xe1, ye1, ze1, te1, e1,
                                   xe2, ye2, ze2, te2, e2, status);
-      if (ze2 <= Z_AXIS) {
+      if (ze2 <= Z_AXIS + 0.001) {
         nf += 1;
       }
       else {
@@ -137,12 +167,13 @@ void GainOneElectron(std::string folder, double info[9],
       h0EGain -> Fill(nf);
     }
 
-    std::cout << "\n" << N_AVAL -  i << "/" << N_AVAL;
+    std::cout << "\n" << n_events -  i << "/" << n_events;
     std::cout << "\n... avalanche complete with " << np
               << " electron tracks. (number of electrons "
               << ne << ")" << std::endl;
 
-    std::cout << "\n... nf: " << nf << ", n_other: " << n_other << std::endl;
+    std::cout << "\n... effective electrons: " << nf << ", n_other: "
+              << n_other << std::endl;
   }
 
 
@@ -161,15 +192,8 @@ void GainOneElectron(std::string folder, double info[9],
 
   auto t_end = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> diff = t_end - t_start;
-  std::cout << "\n... END OF SIMULATION: " << diff.count() << " s.\n"<< std::endl;
-
-  app.Run(kTRUE);
-
-
-
-
-
-
+  std::cout << "\n... END OF GAIN CALCULATION: "
+            << diff.count() << " s.\n"<< std::endl;
 
 
 }
