@@ -126,8 +126,8 @@ void GainOneElectron(std::string folder, double info[9], bool plot = true,
 
   // Histograms
   int nBins = 100;
-  float hmin = 1.;
-  float hmax = 100.;
+  float hmin = 0.;
+  float hmax = 200.;
 
   TH1F* hRGain = new TH1F("hRGain", "Real Gain", nBins, hmin, hmax);
   TH1F* hEGain = new TH1F("hEGain", "Effective Gain", nBins, hmin, hmax);
@@ -157,9 +157,10 @@ void GainOneElectron(std::string folder, double info[9], bool plot = true,
       }
     }
 
-
-    hRGain -> Fill(np);
-    hEGain -> Fill(nf);
+    if (nf > 0) {
+      hRGain -> Fill(np);
+      hEGain -> Fill(nf);
+    }
 
     std::cout << "\n" << n_events -  i << "/" << n_events;
     std::cout << "\n... avalanche complete with " << np
@@ -174,7 +175,7 @@ void GainOneElectron(std::string folder, double info[9], bool plot = true,
   // Saving Histograms
   std::string title = folder + "_hists.root";
   const char* f_title = title.c_str();
-  TFile* f = new TFile(f_title, "RECREATE");
+  TFile* f = new TFile(f_title, "NEW");
   hRGain -> Write();
   hEGain -> Write();
   f -> Close();
