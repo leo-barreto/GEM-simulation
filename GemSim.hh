@@ -157,10 +157,8 @@ void GainOneElectron(std::string folder, double info[9], bool plot = true,
       }
     }
 
-    if (nf > 0) {
-      hRGain -> Fill(np);
-      hEGain -> Fill(nf);
-    }
+    hRGain -> Fill(np);
+    hEGain -> Fill(nf);
 
     std::cout << "\n" << n_events -  i << "/" << n_events;
     std::cout << "\n... avalanche complete with " << np
