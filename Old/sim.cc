@@ -72,7 +72,7 @@ int main(int argc, char * argv[]) {
     vF -> SetArea(-0.5 * DIST, -2 * T_DIE, 0.5 * DIST, 2 * T_DIE);
     //vF -> SetNumberOfContours(80);
     //vF -> SetNumberOfSamples2d(60, 60);
-    vF -> SetVoltageRange(-38., -30.);
+    vF -> SetVoltageRange(-600., -100.);
     vF -> PlotContour();
 
 

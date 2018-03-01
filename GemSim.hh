@@ -6,6 +6,7 @@
 #include <fstream>
 #include <chrono>
 #include <string>
+#include <cstddef>
 
 #include <TApplication.h>
 #include <TMath.h>
@@ -26,16 +27,20 @@ using namespace Garfield;
 void SetupInfo(double gem[9], std::string folder, double up, double low,
                double t_die, double t_pla, double i_field, double d_field) {
 
- // Dimensions in cm, Fields in V/cm and Potentials in V
- gem[0] = std::stod(folder.substr(3, 5)) / 10000;    // Hole Diameter
- gem[1] = std::stod(folder.substr(6, 9)) / 10000;    // Distance between Holes
+ // Definition of stops in folder
+ std::size_t stop1 = folder.find("_");
+ std::size_t stop2 = folder.find("_", stop1 + 1);
+
+// Dimensions in cm, Fields in V/cm and Potentials in V
+ gem[0] = std::stod(folder.substr(3, stop1)) / 10000;    // Hole Diameter
+ gem[1] = std::stod(folder.substr(stop1 + 1, stop2)) / 10000;    // Distance between Holes
  gem[2] = up;                                        // Distance to Electrode
  gem[3] = low;                                       // Distance to Pad
  gem[4] = t_die;                                     // Dieletric Thickness
  gem[5] = t_pla;                                     // Plates Thickness
  gem[6] = i_field;                                   // Induction Field
  gem[7] = d_field;                                   // Drift Field
- gem[8] = std::stod(folder.substr(10, 13));          // GEM Potential
+ gem[8] = std::stod(folder.substr(stop2 + 1, folder.length()));          // GEM Potential
 
  std::cout << "\nSetup information collected:" << std::endl;
  std::cout << "    Hole Diameter: " << gem[0] << " cm" << std::endl;
@@ -165,8 +170,7 @@ void GainOneElectron(std::string folder, double info[9], bool plot = true,
               << " electron tracks. (number of electrons "
               << ne << ")" << std::endl;
 
-    std::cout << "\n... effective electrons: " << nf << ", n_other: "
-              << n_other << std::endl;
+    std::cout << "\n... effective electrons: " << nf << std::endl;
   }
 
 
