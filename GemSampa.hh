@@ -26,16 +26,50 @@ void SetupInfo(double gem[9], std::string folder, double diam, double dist,
                double i_field, double d_field, double potential) {
 
 
-// Dimensions in cm, Fields in V/cm and Potentials in V
- gem[0] = diam / 10000;    // Hole Diameter
- gem[1] = dist / 10000;    // Distance between Holes
- gem[2] = up;              // Distance to Electrode
- gem[3] = low;             // Distance to Pad
- gem[4] = t_die;           // Dieletric Thickness
- gem[5] = t_pla;           // Plates Thickness
- gem[6] = i_field;         // Induction Field
- gem[7] = d_field;         // Drift Field
- gem[8] = potential;       // GEM Potential
+ // Dimensions in cm, Fields in V/cm and Potentials in
+  gem[0] = diam / 10000;    // Hole Diameter
+  gem[1] = dist / 10000;    // Distance between Holes
+  gem[2] = up;              // Distance to Electrode
+  gem[3] = low;             // Distance to Pad
+  gem[4] = t_die;           // Dieletric Thickness
+  gem[5] = t_pla;           // Plates Thickness
+  gem[6] = i_field;         // Induction Field
+  gem[7] = d_field;         // Drift Field
+  gem[8] = potential;       // GEM Potential
+
+}
+
+
+bool CheckHist(std::string folder, bool penning = true,
+               int nBins = 200, float hmax = 10000., float hmin = 0.) {
+
+
+  // Naming the File
+  if (!penning) {
+    folder += "_pfake";
+    std::string title = folder + "_hists.root";
+  }
+  std::string title = folder + "_hists.root";
+
+
+  // Check Existence
+  std::ifstream fin(title);
+  if (!fin) {
+    const char* f_title = title.c_str();
+    TFile* f = new TFile(f_title, "NEW");
+
+    // Write Empty Histograms
+    TH1F* hRGain = new TH1F("hRGain", "Real Gain", nBins, hmin, hmax);
+    TH1F* hEGain = new TH1F("hEGain", "Effective Gain", nBins, hmin, hmax);
+    hRGain -> Write();
+    hEGain -> Write();
+    f -> Close();
+
+    return false;
+  }
+  else {
+    return true;
+  }
 
 }
 
@@ -109,7 +143,6 @@ void GainOneElectron(std::string folder, double info[9], bool plot = true,
   float hmin = 0.;
   float hmax = 10000.;
 
-
   TH1F* hRGain = new TH1F("hRGain", "Real Gain", nBins, hmin, hmax);
   TH1F* hEGain = new TH1F("hEGain", "Effective Gain", nBins, hmin, hmax);
 
@@ -146,12 +179,11 @@ void GainOneElectron(std::string folder, double info[9], bool plot = true,
 
 
   // Saving Histograms
-  if (penning) {
+  if (!penning) {
+    folder += "_pfake";
     std::string title = folder + "_hists.root";
   }
-  else {
-    std::string title = folder + "pfake_hists.root";
-  }
+  std::string title = folder + "_hists.root";
   const char* f_title = title.c_str();
   TFile* f = new TFile(f_title, "NEW");
   hRGain -> Write();
