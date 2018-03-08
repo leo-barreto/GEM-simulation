@@ -40,7 +40,7 @@ void SetupInfo(double gem[9], std::string folder, double diam, double dist,
 }
 
 
-bool CheckHist(std::string folder, bool penning = true,
+/*bool CheckHist(std::string folder, bool penning = true,
                int nBins = 200, float hmax = 10000., float hmin = 0.) {
 
 
@@ -70,6 +70,36 @@ bool CheckHist(std::string folder, bool penning = true,
   else {
     return true;
   }
+
+}
+*/
+
+std::string CheckTXT(std::string folder, bool penning = true) {
+
+
+  // Naming the File
+  if (!penning) {
+    folder += "_pfake";
+    std::string title = folder + "_gain.txt";
+  }
+  std::string title = folder + "_gain.txt";
+
+
+  // Check Existence
+  std::ifstream fin(title);
+  if (!fin) {
+    std::ofstream file;
+    file.open(title);
+    file << "Real Gain; Effective Gain" << std::endl;
+    file.close();
+    std::cout << "\nCreating Text File..." << std::endl;
+
+  }
+  else {
+    std::cout << "\nText File already created..." << std::endl;
+  }
+
+  return title;
 
 }
 
@@ -139,12 +169,14 @@ void GainOneElectron(std::string folder, double info[9], bool plot = true,
 
 
   // Histograms
-  int nBins = 1000;
+  /*int nBins = 1000;
   float hmin = 0.;
   float hmax = 10000.;
 
   TH1F* hRGain = new TH1F("hRGain", "Real Gain", nBins, hmin, hmax);
-  TH1F* hEGain = new TH1F("hEGain", "Effective Gain", nBins, hmin, hmax);
+  TH1F* hEGain = new TH1F("hEGain", "Effective Gain", nBins, hmin, hmax);*/
+  std::string title = CheckTXT(folder, penning);
+  std::ofstream file;
 
   // Avalanches Calculations
   for (int i = n_events; i--;) {
@@ -171,17 +203,19 @@ void GainOneElectron(std::string folder, double info[9], bool plot = true,
       }
     }
 
-    hRGain -> Fill(np);
-    hEGain -> Fill(nf);
+    /*hRGain -> Fill(np);
+    hEGain -> Fill(nf);*/
+    file.open(title, std::ios_base::app);
+    file << np << "; " << nf << std::endl;
+    file.close();
     std::cout << "\nReal Gain: " << np << ", Effective Gain: " << nf << std::endl;
 
   }
 
 
-  // Saving Histograms
+/*  // Saving Histograms
   if (!penning) {
     folder += "_pfake";
-    std::string title = folder + "_hists.root";
   }
   std::string title = folder + "_hists.root";
   const char* f_title = title.c_str();
@@ -199,7 +233,7 @@ void GainOneElectron(std::string folder, double info[9], bool plot = true,
      hRGain -> Draw();
      cH -> cd(2);
      hEGain -> Draw();
-   }
+   }*/
 
 }
 
