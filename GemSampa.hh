@@ -29,13 +29,13 @@ void SetupInfo(double gem[9], std::string folder, double diam, double dist,
 // Dimensions in cm, Fields in V/cm and Potentials in V
  gem[0] = diam / 10000;    // Hole Diameter
  gem[1] = dist / 10000;    // Distance between Holes
- gem[2] = up;                                        // Distance to Electrode
- gem[3] = low;                                       // Distance to Pad
- gem[4] = t_die;                                     // Dieletric Thickness
- gem[5] = t_pla;                                     // Plates Thickness
- gem[6] = i_field;                                   // Induction Field
- gem[7] = d_field;                                   // Drift Field
- gem[8] = potential;          // GEM Potential
+ gem[2] = up;              // Distance to Electrode
+ gem[3] = low;             // Distance to Pad
+ gem[4] = t_die;           // Dieletric Thickness
+ gem[5] = t_pla;           // Plates Thickness
+ gem[6] = i_field;         // Induction Field
+ gem[7] = d_field;         // Drift Field
+ gem[8] = potential;       // GEM Potential
 
 }
 
@@ -105,9 +105,10 @@ void GainOneElectron(std::string folder, double info[9], bool plot = true,
 
 
   // Histograms
-  int nBins = 100;
+  int nBins = 1000;
   float hmin = 0.;
-  float hmax = 200.;
+  float hmax = 10000.;
+
 
   TH1F* hRGain = new TH1F("hRGain", "Real Gain", nBins, hmin, hmax);
   TH1F* hEGain = new TH1F("hEGain", "Effective Gain", nBins, hmin, hmax);
@@ -139,12 +140,18 @@ void GainOneElectron(std::string folder, double info[9], bool plot = true,
 
     hRGain -> Fill(np);
     hEGain -> Fill(nf);
+    std::cout << "\nReal Gain: " << np << ", Effective Gain: " << nf << std::endl;
 
   }
 
 
   // Saving Histograms
-  std::string title = folder + "_hists.root";
+  if (penning) {
+    std::string title = folder + "_hists.root";
+  }
+  else {
+    std::string title = folder + "pfake_hists.root";
+  }
   const char* f_title = title.c_str();
   TFile* f = new TFile(f_title, "NEW");
   hRGain -> Write();
@@ -153,7 +160,7 @@ void GainOneElectron(std::string folder, double info[9], bool plot = true,
 
 
   // Plotting
-  if (plot == true) {
+  if (plot) {
      TCanvas* cH = new TCanvas("cH", "Histograms", 800, 400);
      cH -> Divide(2,1);
      cH -> cd(1);
