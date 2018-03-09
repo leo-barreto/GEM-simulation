@@ -72,7 +72,7 @@ void SetupInfo(double gem[9], std::string folder, double diam, double dist,
   }
 
 }
-*/
+
 
 std::string CheckTXT(std::string folder, bool penning = true) {
 
@@ -101,10 +101,12 @@ std::string CheckTXT(std::string folder, bool penning = true) {
 
   return title;
 
-}
+}*/
 
 
-void GainOneElectron(std::string folder, double info[9], bool plot = true,
+
+void GainOneElectron(std::string folder, double info[9],
+                     std::string txtfile, bool plot = true,
                      int sizelimit = 10, int n_events = 100,
                      double electron_pos = 0.05, bool penning = true) {
 
@@ -160,11 +162,9 @@ void GainOneElectron(std::string folder, double info[9], bool plot = true,
   // Avalanche and Drift Setup
   AvalancheMicroscopic* aval = new AvalancheMicroscopic();
   aval -> SetSensor(sensor);
+  aval -> SetCollisionSteps(100);
   if (sizelimit > 0) {
     aval -> EnableAvalancheSizeLimit(sizelimit);
-  }
-  else {
-    aval -> DisableAvalancheSizeLimit();
   }
 
 
@@ -175,8 +175,6 @@ void GainOneElectron(std::string folder, double info[9], bool plot = true,
 
   TH1F* hRGain = new TH1F("hRGain", "Real Gain", nBins, hmin, hmax);
   TH1F* hEGain = new TH1F("hEGain", "Effective Gain", nBins, hmin, hmax);*/
-  std::string title = CheckTXT(folder, penning);
-  std::ofstream file;
 
   // Avalanches Calculations
   for (int i = n_events; i--;) {
@@ -205,7 +203,8 @@ void GainOneElectron(std::string folder, double info[9], bool plot = true,
 
     /*hRGain -> Fill(np);
     hEGain -> Fill(nf);*/
-    file.open(title, std::ios_base::app);
+    std::ofstream file;
+    file.open(txtfile, std::ios_base::app);
     file << np << "; " << nf << std::endl;
     file.close();
     std::cout << "\nReal Gain: " << np << ", Effective Gain: " << nf << std::endl;
