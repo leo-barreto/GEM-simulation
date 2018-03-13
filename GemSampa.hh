@@ -203,10 +203,15 @@ void GainOneElectron(std::string folder, double info[9],
 
     /*hRGain -> Fill(np);
     hEGain -> Fill(nf);*/
-    std::ofstream file;
-    file.open(txtfile, std::ios_base::app);
+    /* std::ofstream file(txtfile, std::ios_base::app);
     file << np << "; " << nf << std::endl;
-    file.close();
+    file.close();*/
+    FILE* file;
+    const char* f_title = txtfile.c_str();
+    file = fopen(f_title, "a");
+    fprintf(file, "%d;%d\n", np, nf);
+    fclose(file);
+
     std::cout << "\nReal Gain: " << np << ", Effective Gain: " << nf << std::endl;
 
   }

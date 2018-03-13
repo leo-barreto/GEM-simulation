@@ -15,9 +15,9 @@ DISTANCE_ELE = 1.;
 Function gf_gem
 
   // Characteristic Distances
-  lc_D = DISTANCE_HOLES / 20;
-  lc_P = DISTANCE_HOLES / 20;
-  lc_M = (DISTANCE_ELE + DISTANCE_PAD) / 100;
+  lc_D = DISTANCE_HOLES / 15;
+  lc_P = DISTANCE_HOLES / 15;
+  lc_M = (DISTANCE_ELE + DISTANCE_PAD) / 10;
 
 
   // Dieletric
