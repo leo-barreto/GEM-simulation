@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <ctime>
 
 #include <TApplication.h>
 #include <TMath.h>
@@ -38,70 +39,6 @@ void SetupInfo(double gem[9], std::string folder, double diam, double dist,
   gem[8] = potential;       // GEM Potential
 
 }
-
-
-/*bool CheckHist(std::string folder, bool penning = true,
-               int nBins = 200, float hmax = 10000., float hmin = 0.) {
-
-
-  // Naming the File
-  if (!penning) {
-    folder += "_pfake";
-    std::string title = folder + "_hists.root";
-  }
-  std::string title = folder + "_hists.root";
-
-
-  // Check Existence
-  std::ifstream fin(title);
-  if (!fin) {
-    const char* f_title = title.c_str();
-    TFile* f = new TFile(f_title, "NEW");
-
-    // Write Empty Histograms
-    TH1F* hRGain = new TH1F("hRGain", "Real Gain", nBins, hmin, hmax);
-    TH1F* hEGain = new TH1F("hEGain", "Effective Gain", nBins, hmin, hmax);
-    hRGain -> Write();
-    hEGain -> Write();
-    f -> Close();
-
-    return false;
-  }
-  else {
-    return true;
-  }
-
-}
-
-
-std::string CheckTXT(std::string folder, bool penning = true) {
-
-
-  // Naming the File
-  if (!penning) {
-    folder += "_pfake";
-    std::string title = folder + "_gain.txt";
-  }
-  std::string title = folder + "_gain.txt";
-
-
-  // Check Existence
-  std::ifstream fin(title);
-  if (!fin) {
-    std::ofstream file;
-    file.open(title);
-    file << "Real Gain; Effective Gain" << std::endl;
-    file.close();
-    std::cout << "\nCreating Text File..." << std::endl;
-
-  }
-  else {
-    std::cout << "\nText File already created..." << std::endl;
-  }
-
-  return title;
-
-}*/
 
 
 
@@ -168,16 +105,11 @@ void GainOneElectron(std::string folder, double info[9],
   }
 
 
-  // Histograms
-  /*int nBins = 1000;
-  float hmin = 0.;
-  float hmax = 10000.;
-
-  TH1F* hRGain = new TH1F("hRGain", "Real Gain", nBins, hmin, hmax);
-  TH1F* hEGain = new TH1F("hEGain", "Effective Gain", nBins, hmin, hmax);*/
-
   // Avalanches Calculations
   for (int i = n_events; i--;) {
+
+    const clock_t begin_time = clock();
+
     // Random Initial Positions
     double x0 = (2 * RndmUniform() - 1) * DIST / 2;
     double y0 = (2 * RndmUniform() - 1) * DIST / 2;
@@ -201,44 +133,20 @@ void GainOneElectron(std::string folder, double info[9],
       }
     }
 
-    /*hRGain -> Fill(np);
-    hEGain -> Fill(nf);*/
-    /* std::ofstream file(txtfile, std::ios_base::app);
-    file << np << "; " << nf << std::endl;
-    file.close();*/
+    // Saving Gains
     FILE* file;
     const char* f_title = txtfile.c_str();
     file = fopen(f_title, "a");
-    fprintf(file, "%d;%d\n", np, nf);
+    float min = float(clock () - begin_time) / (CLOCKS_PER_SEC * 60);
+    fprintf(file, "%d;%d;%.2f\n", np, nf, min);
     fclose(file);
 
+    if (np == 1) {
+      i += 1;         // No multiplication doesn't add to counter
+    }
+
     std::cout << "\nReal Gain: " << np << ", Effective Gain: " << nf << std::endl;
-
   }
-
-
-/*  // Saving Histograms
-  if (!penning) {
-    folder += "_pfake";
-  }
-  std::string title = folder + "_hists.root";
-  const char* f_title = title.c_str();
-  TFile* f = new TFile(f_title, "NEW");
-  hRGain -> Write();
-  hEGain -> Write();
-  f -> Close();
-
-
-  // Plotting
-  if (plot) {
-     TCanvas* cH = new TCanvas("cH", "Histograms", 800, 400);
-     cH -> Divide(2,1);
-     cH -> cd(1);
-     hRGain -> Draw();
-     cH -> cd(2);
-     hEGain -> Draw();
-   }*/
-
 }
 
 #endif
