@@ -107,7 +107,6 @@ void GainOneElectron(std::string folder, double info[9],
 
   // Avalanches Calculations
   for (int i = n_events; i--;) {
-
     const clock_t begin_time = clock();
 
     // Random Initial Positions
@@ -125,11 +124,9 @@ void GainOneElectron(std::string folder, double info[9],
     for (int j = np; j--;) {
       aval -> GetElectronEndpoint(j, xe1, ye1, ze1, te1, e1,
                                   xe2, ye2, ze2, te2, e2, status);
+
       if (ze2 <= Z_AXIS + 0.001) {
         nf += 1;
-      }
-      else {
-        n_other += 1;
       }
     }
 
@@ -145,8 +142,29 @@ void GainOneElectron(std::string folder, double info[9],
       i += 1;         // No multiplication doesn't add to counter
     }
 
-    std::cout << "\nReal Gain: " << np << ", Effective Gain: " << nf << std::endl;
   }
 }
+
+
+/*
+void ReadTXTGain(std::string txtfolder, const char* rootname) {
+
+  // ROOT File
+  TFile* f = new TFile(rootname, "NEW");
+  float r, e, t;
+
+  for i in
+
+
+
+
+
+  f -> Close();
+
+
+
+}*/
+
+
 
 #endif
