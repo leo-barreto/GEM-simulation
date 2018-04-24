@@ -23,3 +23,8 @@ ghole: ghole.cc
 	$(CXX) $(CFLAGS) -c ghole.cc
 	$(CXX) $(CFLAGS) -o ghole ghole.o $(LDFLAGS)
 	rm ghole.o
+
+gtension: gtension.cc
+	$(CXX) $(CFLAGS) -c gtension.cc
+	$(CXX) $(CFLAGS) -o gtension gtension.o $(LDFLAGS)
+	rm gtension.o

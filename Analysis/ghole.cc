@@ -21,7 +21,6 @@ int main(int argc, char * argv[]) {
   ReadTXTGain(txt);
   TFile* f = new TFile("gainhole_hists.root");
 
-
   for (int i = 0; i < N; i++) {
     int d = diam[i];
     string hRi = hR + to_string(d);
@@ -49,7 +48,6 @@ int main(int argc, char * argv[]) {
     sp = sqrt(pow(s2 / m1, 2) + pow(s1 * m2 / (m1 * m1), 2));
     perc[i] = mp;
     erperc[i] = sp;
-
   }
 
   // Gain/Geometry Graph Properties
@@ -67,7 +65,7 @@ int main(int argc, char * argv[]) {
 
   g -> Add(realg);
   g -> Add(effeg);
-  g -> SetTitle("Ganho para diferentes Geometrias (#DeltaV_{GEM} = 500V)");
+  g -> SetTitle("Ganho para diferentes Geometrias (#DeltaV_{GEM} = 500 V)");
   g -> Draw("ap");
   g -> GetXaxis() -> SetTitle("Di#hat{a}metro [#mum]");
   g -> GetYaxis() -> SetTitle("Ganho");
@@ -84,7 +82,7 @@ int main(int argc, char * argv[]) {
 
   percent -> SetMarkerColor(kBlue);
   percent -> SetMarkerStyle(21);
-  percent -> SetTitle("Comparac#hat{a}o entre Real e Efetivo (#DeltaV_{GEM} = 500V)");
+  percent -> SetTitle("Comparac#hat{a}o entre Real e Efetivo (#DeltaV_{GEM} = 500 V)");
   percent -> Draw("ap");
   percent -> GetXaxis() -> SetTitle("Di#hat{a}metro [#mum]");
   percent -> GetYaxis() -> SetTitle("Efetivo / Real %");
