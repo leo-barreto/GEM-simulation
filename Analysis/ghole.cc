@@ -15,7 +15,7 @@ int main(int argc, char * argv[]) {
   int N = 12;
   double diam[N] = {20., 30., 40., 50., 60., 70., 80., 90., 100., 110., 120., 130.};
   double erdiam[N] = {0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.};
-  double rg[N], eg[N], err[N], ere[N];
+  double rg[N], eg[N], err[N], ere[N], perc[N], erperc[N];
 
   // ROOT File
   ReadTXTGain(txt);
@@ -29,7 +29,7 @@ int main(int argc, char * argv[]) {
     TH1I* h1 = (TH1I*)f -> Get(hRi.c_str());
     TH1I* h2 = (TH1I*)f -> Get(hEi.c_str());
 
-    double m1, m2, s1, s2;
+    double m1, m2, s1, s2, mp, sp;
     m1 = h1 -> GetMean();
     m2 = h2 -> GetMean();
     s1 = h1 -> GetStdDev() / sqrt(h1 -> GetEntries());
@@ -45,12 +45,14 @@ int main(int argc, char * argv[]) {
     err[i] = s1;
     ere[i] = s2;
 
-    //perc.push_back(m2 / m1);
-    //errperc.push_back(sqrt((s2 / m1) ** 2 + (s1 * m2 / (m1 ** 2) ** 2));
+    mp = m2 / m1;
+    sp = sqrt(pow(s2 / m1, 2) + pow(s1 * m2 / (m1 * m1), 2));
+    perc[i] = mp;
+    erperc[i] = sp;
 
   }
 
-  // Graph Properties
+  // Gain/Geometry Graph Properties
   TCanvas* c = new TCanvas();
   c -> SetLogy();
   TMultiGraph *g = new TMultiGraph();
@@ -75,6 +77,17 @@ int main(int argc, char * argv[]) {
   leg -> AddEntry(realg, "Ganho Real", "p");
   leg -> AddEntry(effeg, "Ganho Efetivo", "p");
   leg -> Draw();
+
+  // Effective/Real Graph Properties
+  TCanvas* c2 = new TCanvas();
+  TGraphErrors* percent = new TGraphErrors(N, diam, perc, erdiam, erperc);
+
+  percent -> SetMarkerColor(kBlue);
+  percent -> SetMarkerStyle(21);
+  percent -> SetTitle("Comparac#hat{a}o entre Real e Efetivo (#DeltaV_{GEM} = 500V)");
+  percent -> Draw("ap");
+  percent -> GetXaxis() -> SetTitle("Di#hat{a}metro [#mum]");
+  percent -> GetYaxis() -> SetTitle("Efetivo / Real %");
 
   cout << "\nDone!" << endl;
   app.Run(kTRUE);
