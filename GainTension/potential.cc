@@ -14,6 +14,6 @@ int main(int argc, char * argv[]) {
   string TXT = "t" + T + ".txt";
 
   SetupInfo(g, S, 70., 140., 0.1, 0.1, 0.005, 0.0005, 3000., 1000., potent);
-  GainOneElectron(S, g, TXT, false, 0, 1, 0.05, true);
+  GainOneElectron(S, g, TXT, false, 0, 200, 0.05, true);
 
 }

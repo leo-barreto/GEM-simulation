@@ -48,7 +48,7 @@ void SetupInfo(double gem[9], std::string folder, double diam, double dist,
 void GainOneElectron(std::string folder, double info[9],
                      std::string txtfile, bool plot = true,
                      int sizelimit = 10, int n_events = 100,
-                     double electron_pos = 0.05, bool penning = true) {
+                     bool penning = true) {
 
 
   // GEM Dimensions in cm
@@ -60,6 +60,7 @@ void GainOneElectron(std::string folder, double info[9],
   const double D_P = info[3];
 
   const double Z_AXIS = -1 * (D_P + T_DIE / 2 + T_PLA);
+  const double electron_pos = T_DIE / 2 + T_PLA + (0.1 + 0.8 * RndmUniform()) * D_E;
 
 
   // Import

@@ -82,7 +82,7 @@ int main(int argc, char * argv[]) {
 
   percent -> SetMarkerColor(kBlue);
   percent -> SetMarkerStyle(21);
-  percent -> SetTitle("Comparac#hat{a}o entre Real e Efetivo (#DeltaV_{GEM} = 500 V)");
+  percent -> SetTitle("Comparac#tilde{a}o entre Ganho Real e Efetivo (#DeltaV_{GEM} = 500 V)");
   percent -> Draw("ap");
   percent -> GetXaxis() -> SetTitle("Di#hat{a}metro [#mum]");
   percent -> GetYaxis() -> SetTitle("Efetivo / Real %");
