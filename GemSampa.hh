@@ -21,6 +21,7 @@
 #include "AvalancheMicroscopic.hh"
 #include "AvalancheMC.hh"
 #include "Random.hh"
+#include "TrackHeed.hh"
 
 
 using namespace Garfield;
@@ -71,9 +72,7 @@ ComponentElmer* LoadGas(std::string folder, double percent = 70.,
   gas -> SetPressure(press);
   gas -> SetMaxElectronEnergy(2000.);
   gas -> EnableDrift();
-  gas -> EnableDebugging();
   gas -> Initialise();
-  gas -> DisableDebugging();
 
   if (penning != 0.) {
    gas -> EnablePenningTransfer(penning, 0., noble);
@@ -90,10 +89,8 @@ ComponentElmer* LoadGas(std::string folder, double percent = 70.,
 
 
 
-void GainOneElectron(std::string folder, double info[9],
-                     std::string txtfile, bool plot = true,
-                     int sizelimit = 10, int n_events = 100,
-                     bool penning = true) {
+void GainOneElectron(std::string folder, double info[9], std::string txtfile,
+                     int sizelimit = 10, int n_events = 100) {
 
 
   // GEM Dimensions in cm
@@ -112,7 +109,7 @@ void GainOneElectron(std::string folder, double info[9],
   ComponentElmer* Elm = LoadGas(folder);
 
 
-  // Sensor.
+  // Sensor
   Sensor* sensor = new Sensor();
   sensor -> AddComponent(Elm);
   sensor -> SetArea(-DIST, -H, Z_AXIS, DIST, H, electron_pos + 0.01);
@@ -165,6 +162,89 @@ void GainOneElectron(std::string folder, double info[9],
     }
 
   }
+}
+
+
+void EnergyRes(std::string folder, double info[9], double energy,
+               int n_events = 1000, bool plot = true,
+               const char* particle = "alpha") {
+
+  // GEM Dimensions in cm
+  const double T_DIE = info[4];
+  const double T_PLA = info[5];
+  const double DIST = info[1];
+  const double H = sqrt(3) * DIST / 2;
+  const double D_E = info[2];
+  const double D_P = info[3];
+
+  const double Z_AXIS = -1 * (D_P + T_DIE / 2 + T_PLA);
+
+
+  // Initial Parameters for Track
+  double x0 = (2 * RndmUniform() - 1) * DIST / 2;
+  double y0 = (2 * RndmUniform() - 1) * H / 2;
+  double z0 = T_DIE / 2 + T_PLA + D_E - 0.01;
+  double t0 = 0.;
+  double dx0 = 2 * RndmUniform() - 1;
+  double dy0 = 2 * RndmUniform() - 1;
+  double dz0 = -1;
+
+
+  // Sensor
+  ComponentElmer* Elm = LoadGas(folder);
+  Sensor* sensor = new Sensor();
+  sensor -> AddComponent(Elm);
+  sensor -> SetArea(-2 * DIST, -2 * H, Z_AXIS, 2 * DIST, 2 * H, z0);
+
+
+  // Histograms
+  TH1::StatOverflows(kTRUE);
+  TH1F* hElectrons = new TH1F("hElectrons", "Number of Electrons", 200, 0, 200);
+  TH1F* hEdep = new TH1F("hEdep", "Energy Loss", 100, 0., 10.);
+
+  // Setup Track
+  TrackHeed* track = new TrackHeed();
+  track -> SetSensor(sensor);
+  track -> SetParticle(particle);
+  track -> SetEnergy(energy);
+
+  for (int i = n_events; i--;) {
+    track -> NewTrack(x0, y0, z0, t0, dx0, dy0, dz0);
+
+    // Cluster coordinates
+    double xc, yc, zc, tc, extra;
+    // Number of electrons produced in a collision and total
+    int nc = 0, nsum = 0.;
+    // Energy loss in a collision and total
+    double ec = 0., esum = 0.;
+
+    // Loop over the clusters.
+    while (track -> GetCluster(xc, yc, zc, tc, nc, ec, extra)) {
+      esum += ec;
+      nsum += nc;
+    }
+
+    hElectrons->Fill(nsum);
+    hEdep->Fill(esum * 1.e-3);
+  }
+
+  if (plot == true) {
+    TCanvas* c1 = new TCanvas();
+    hElectrons -> GetXaxis() -> SetTitle("N");
+    hElectrons -> Draw();
+
+    TCanvas* c2 = new TCanvas();
+    hEdep -> GetXaxis()-> SetTitle("energy loss [keV]");
+    hEdep -> Draw();
+  }
+
+
+
+
+
+
+
+
 }
 
 
