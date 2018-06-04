@@ -25,12 +25,12 @@
 
 using namespace Garfield;
 
-void SetupInfo(double gem[9], std::string folder, double diam, double dist,
+void SetupInfo(double gem[9], double diam, double dist,
                double up, double low, double t_die, double t_pla,
                double i_field, double d_field, double potential) {
 
 
- // Dimensions in cm, Fields in V/cm and Potentials in
+ // Dimensions in cm, Fields in V/cm and Potentials in V
   gem[0] = diam / 10000;    // Hole Diameter
   gem[1] = dist / 10000;    // Distance between Holes
   gem[2] = up;              // Distance to Electrode
@@ -45,6 +45,51 @@ void SetupInfo(double gem[9], std::string folder, double diam, double dist,
 
 
 
+ComponentElmer* LoadGas(std::string folder, double percent = 70.,
+                        double ppm = 0., double penning = 0.57,
+                        const char* noble = "ar",
+                        double temp = 293.15, double press = 760.) {
+  // Temperature (temp) in Kelvin and Pressure (press) in Torr
+
+  // Import
+  ComponentElmer* elm = new ComponentElmer(folder + "/mesh.header",
+                                          folder + "/mesh.elements",
+                                          folder + "/mesh.nodes",
+                                          folder + "/dielectrics.dat",
+                                          folder + "/gem.result", "mm");
+  elm -> EnablePeriodicityX();
+  elm -> EnableMirrorPeriodicityY();
+
+  double o2 = ppm * 1E-4;
+  double co2 = 100. - percent - o2;
+
+
+  // Medium
+  MediumMagboltz* gas = new MediumMagboltz();
+  gas -> SetComposition(noble, percent, "co2", co2, "o2", o2);
+  gas -> SetTemperature(temp);
+  gas -> SetPressure(press);
+  gas -> SetMaxElectronEnergy(2000.);
+  gas -> EnableDrift();
+  gas -> EnableDebugging();
+  gas -> Initialise();
+  gas -> DisableDebugging();
+
+  if (penning != 0.) {
+   gas -> EnablePenningTransfer(penning, 0., noble);
+  }
+  else {
+   gas -> DisablePenningTransfer();
+  }
+
+  elm -> SetMedium(0, gas);
+
+  return elm;
+
+}
+
+
+
 void GainOneElectron(std::string folder, double info[9],
                      std::string txtfile, bool plot = true,
                      int sizelimit = 10, int n_events = 100,
@@ -54,7 +99,7 @@ void GainOneElectron(std::string folder, double info[9],
   // GEM Dimensions in cm
   const double T_DIE = info[4];
   const double T_PLA = info[5];
-  const double DIST = info [1];
+  const double DIST = info[1];
   const double H = sqrt(3) * DIST / 2;
   const double D_E = info[2];
   const double D_P = info[3];
@@ -63,40 +108,13 @@ void GainOneElectron(std::string folder, double info[9],
   const double electron_pos = T_DIE / 2 + T_PLA + (0.1 + 0.8 * RndmUniform()) * D_E;
 
 
-  // Import
-  ComponentElmer* elm = new ComponentElmer(folder + "/mesh.header",
-                                           folder + "/mesh.elements",
-                                           folder + "/mesh.nodes",
-                                           folder + "/dielectrics.dat",
-                                           folder + "/gem.result", "mm");
-  elm -> EnablePeriodicityX();
-  elm -> EnableMirrorPeriodicityY();
-
-
-  // Medium
-  MediumMagboltz* gas = new MediumMagboltz();
-  gas -> SetComposition("ar", 70., "co2", 30.);
-  gas -> SetTemperature(293.15);
-  gas -> SetPressure(760.);
-  gas -> SetMaxElectronEnergy(2000.);
-  gas -> EnableDrift();
-  gas -> EnableDebugging();
-  gas -> Initialise();
-  gas -> DisableDebugging();
-  if (penning) {
-    const double rPenning = 0.57;
-    const double lambdaPenning = 0.;
-    gas -> EnablePenningTransfer(rPenning, lambdaPenning, "ar");
-  }
-  else {
-    gas -> DisablePenningTransfer();
-  }
-  elm -> SetMedium(0, gas);
+  // Import and Set Medium
+  ComponentElmer* Elm = LoadGas(folder);
 
 
   // Sensor.
   Sensor* sensor = new Sensor();
-  sensor -> AddComponent(elm);
+  sensor -> AddComponent(Elm);
   sensor -> SetArea(-DIST, -H, Z_AXIS, DIST, H, electron_pos + 0.01);
 
 
@@ -225,6 +243,7 @@ void ReadTXTGain(std::string txtfolder) {
   std::cout << "\nFinished saving all histograms!\n" << std::endl;
 
 }
+
 
 
 
