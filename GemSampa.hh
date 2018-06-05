@@ -61,6 +61,7 @@ ComponentElmer* LoadGas(std::string folder, double percent = 70.,
   elm -> EnablePeriodicityX();
   elm -> EnableMirrorPeriodicityY();
 
+
   double o2 = ppm * 1E-4;
   double co2 = 100. - percent - o2;
 
@@ -133,7 +134,7 @@ void GainOneElectron(std::string folder, double info[9], std::string txtfile,
     double y0 = (2 * RndmUniform() - 1) * DIST / 2;
     aval -> AvalancheElectron(x0, y0, electron_pos, 0, 0, 0., 0., 0.);
     int np = aval -> GetNumberOfElectronEndpoints();
-    int ne = 0, ni = 0, nf = 0, n_other = 0;
+    int ne = 0, ni = 0, nf = 0;
     aval -> GetAvalancheSize(ne, ni);
 
     // Final Positions Analysis
@@ -165,9 +166,9 @@ void GainOneElectron(std::string folder, double info[9], std::string txtfile,
 }
 
 
-void EnergyRes(std::string folder, double info[9], double energy,
-               int n_events = 1000, bool plot = true,
-               const char* particle = "alpha") {
+void LaunchParticle(std::string folder, double info[9], std::string txtfile,
+               double energy, int n_events = 1000,
+               bool plot = true, const char* particle = "alpha") {
 
   // GEM Dimensions in cm
   const double T_DIE = info[4];
@@ -199,8 +200,9 @@ void EnergyRes(std::string folder, double info[9], double energy,
 
   // Histograms
   TH1::StatOverflows(kTRUE);
-  TH1F* hElectrons = new TH1F("hElectrons", "Number of Electrons", 200, 0, 200);
-  TH1F* hEdep = new TH1F("hEdep", "Energy Loss", 100, 0., 10.);
+  TH1F* hEle = new TH1F("hEle", "Number of Primary Electrons",
+                        200, 0, 200);
+  TH1F* hEne = new TH1F("hEne", "Energy Loss", 100, 0., 10.);
 
   // Setup Track
   TrackHeed* track = new TrackHeed();
@@ -218,33 +220,41 @@ void EnergyRes(std::string folder, double info[9], double energy,
     // Energy loss in a collision and total
     double ec = 0., esum = 0.;
 
-    // Loop over the clusters.
+    // Loop over the clusters
     while (track -> GetCluster(xc, yc, zc, tc, nc, ec, extra)) {
       esum += ec;
       nsum += nc;
+      for (int j = 0; j < nc; j++) {
+        // Properties of electron (pos, time, energy, velocity vector)
+        double xe1, ye1, ze1, te1, e1, dxe, dye, dze;
+        double xe2, ye2, ze2, te2, e2;
+        int status;
+        track -> GetElectron(j, xe1, ye1, ze1, te1, e1, dxe, dye, dze);
+
+        // Saving on txt file
+        // Energy and velocity are not provided by Heed, so they are ignored
+        FILE* file;
+        const char* f_title = txtfile.c_str();
+        file = fopen(f_title, "a");
+        fprintf(file, "%d;%f;%f;%f;%f\n", xe1, ye1, ze1, te1);
+        fclose(file);
+      }
     }
 
-    hElectrons->Fill(nsum);
-    hEdep->Fill(esum * 1.e-3);
+    hEle -> Fill(nsum);
+    hEne -> Fill(esum * 1.E-3);
+
   }
 
   if (plot == true) {
     TCanvas* c1 = new TCanvas();
-    hElectrons -> GetXaxis() -> SetTitle("N");
-    hElectrons -> Draw();
+    hEle -> GetXaxis() -> SetTitle("Number of Electrons");
+    hEle -> Draw();
 
     TCanvas* c2 = new TCanvas();
-    hEdep -> GetXaxis()-> SetTitle("energy loss [keV]");
-    hEdep -> Draw();
+    hEne-> GetXaxis() -> SetTitle("Energy Loss [keV]");
+    hEne -> Draw();
   }
-
-
-
-
-
-
-
-
 }
 
 
