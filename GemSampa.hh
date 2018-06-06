@@ -196,7 +196,7 @@ void LaunchParticle(ComponentElmer* Elm, double info[9], std::string txtfile,
   // Histograms
   TH1::StatOverflows(kTRUE);
   TH1F* hEle = new TH1F("hEle", "Number of Primary Electrons",
-                        200, 0, 200);
+                        100, 0, 200);
   TH1F* hEne = new TH1F("hEne", "Energy Loss", 100, 0., 10.);
 
   // Setup Track
@@ -231,7 +231,7 @@ void LaunchParticle(ComponentElmer* Elm, double info[9], std::string txtfile,
         FILE* file;
         const char* f_title = txtfile.c_str();
         file = fopen(f_title, "a");
-        fprintf(file, "%d;%f;%f;%f;%f\n", xe1, ye1, ze1, te1);
+        fprintf(file, "%d;%f;%f;%f;%f\n", i, xe1, ye1, ze1, te1);
         fclose(file);
       }
     }
