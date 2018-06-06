@@ -28,3 +28,8 @@ gtension: gtension.cc
 	$(CXX) $(CFLAGS) -c gtension.cc
 	$(CXX) $(CFLAGS) -o gtension gtension.o $(LDFLAGS)
 	rm gtension.o
+
+gpenn: gpenn.cc
+	$(CXX) $(CFLAGS) -c gpenn.cc
+	$(CXX) $(CFLAGS) -o gpenn gpenn.o $(LDFLAGS)
+	rm gpenn.o

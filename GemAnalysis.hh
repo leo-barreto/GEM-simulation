@@ -16,6 +16,14 @@
 #include <TCanvas.h>
 #include <TFile.h>
 
+#include "ComponentElmer.hh"
+#include "MediumMagboltz.hh"
+#include "Sensor.hh"
+#include "AvalancheMicroscopic.hh"
+#include "AvalancheMC.hh"
+#include "Random.hh"
+#include "TrackHeed.hh"
+
 
 using namespace Garfield;
 
