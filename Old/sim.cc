@@ -50,11 +50,11 @@ int main(int argc, char * argv[]) {
 
 
     // Import from Elmer
-    ComponentElmer* elm = new ComponentElmer("gem70_140_300/mesh.header",
-                                             "gem70_140_300/mesh.elements",
-                                             "gem70_140_300/mesh.nodes",
-                                             "gem70_140_300/dielectrics.dat",
-                                             "gem70_140_300/gem.result", "mm");
+    ComponentElmer* elm = new ComponentElmer("gem100_140_400/mesh.header",
+                                             "gem100_140_400/mesh.elements",
+                                             "gem100_140_400/mesh.nodes",
+                                             "gem100_140_400/dielectrics.dat",
+                                             "gem100_140_400/gem.result", "mm");
 
     elm -> EnablePeriodicityX();
     elm -> EnableMirrorPeriodicityY();
@@ -72,8 +72,8 @@ int main(int argc, char * argv[]) {
     vF -> SetArea(-0.5 * DIST, -2 * T_DIE, 0.5 * DIST, 2 * T_DIE);
     //vF -> SetNumberOfContours(80);
     //vF -> SetNumberOfSamples2d(60, 60);
-    vF -> SetVoltageRange(-600., -100.);
-    vF -> PlotContour();
+    vF -> SetVoltageRange(-300., -50.);
+    vF -> PlotContour("v");
 
 
     // Medium
