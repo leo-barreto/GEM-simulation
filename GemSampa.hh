@@ -90,8 +90,8 @@ ComponentElmer* LoadGas(std::string folder, double percent = 70.,
 
 
 
-void GainOneElectron(std::string folder, double info[9], std::string txtfile,
-                     int sizelimit = 10, int n_events = 100) {
+void Gain(ComponentElmer* Elm, double info[9], std::string txtfile,
+          int sizelimit = 10, int n_events = 100) {
 
 
   // GEM Dimensions in cm
@@ -104,10 +104,6 @@ void GainOneElectron(std::string folder, double info[9], std::string txtfile,
 
   const double Z_AXIS = -1 * (D_P + T_DIE / 2 + T_PLA);
   const double electron_pos = T_DIE / 2 + T_PLA + (0.1 + 0.8 * RndmUniform()) * D_E;
-
-
-  // Import and Set Medium
-  ComponentElmer* Elm = LoadGas(folder);
 
 
   // Sensor
@@ -166,7 +162,7 @@ void GainOneElectron(std::string folder, double info[9], std::string txtfile,
 }
 
 
-void LaunchParticle(std::string folder, double info[9], std::string txtfile,
+void LaunchParticle(ComponentElmer* Elm, double info[9], std::string txtfile,
                double energy, int n_events = 1000,
                bool plot = true, const char* particle = "alpha") {
 
@@ -192,7 +188,6 @@ void LaunchParticle(std::string folder, double info[9], std::string txtfile,
 
 
   // Sensor
-  ComponentElmer* Elm = LoadGas(folder);
   Sensor* sensor = new Sensor();
   sensor -> AddComponent(Elm);
   sensor -> SetArea(-2 * DIST, -2 * H, Z_AXIS, 2 * DIST, 2 * H, z0);

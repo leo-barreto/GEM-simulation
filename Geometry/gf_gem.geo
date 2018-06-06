@@ -3,7 +3,7 @@ Include "gf_rectangle.geo";
 Include "gf_hole.geo";
 
 
-// Parameters Sipaj in mm
+// Parameters in mm
 RADIUS = 0.035;
 DISTANCE_HOLES = 0.140;
 RADIUS_DIE = 0.010;
