@@ -34,8 +34,8 @@ void SetupInfo(double gem[9], double diam, double dist,
  // Dimensions in cm, Fields in V/cm and Potentials in V
   gem[0] = diam / 10000;    // Hole Diameter
   gem[1] = dist / 10000;    // Distance between Holes
-  gem[2] = up;              // Distance to Electrode
-  gem[3] = low;             // Distance to Pad
+  gem[2] = up;              // Drift Distance
+  gem[3] = low;             // Induction Distance
   gem[4] = t_die;           // Dieletric Thickness
   gem[5] = t_pla;           // Plates Thickness
   gem[6] = i_field;         // Induction Field
@@ -141,7 +141,7 @@ void Gain(ComponentElmer* Elm, double info[9], std::string txtfile,
       aval -> GetElectronEndpoint(j, xe1, ye1, ze1, te1, e1,
                                   xe2, ye2, ze2, te2, e2, status);
 
-      if (ze2 <= Z_AXIS + 0.001) {
+      if (ze2 <= Z_AXIS + 0.001) {  // Added a delta to minimize border effects
         nf += 1;
       }
     }
@@ -164,7 +164,8 @@ void Gain(ComponentElmer* Elm, double info[9], std::string txtfile,
 
 void LaunchParticle(ComponentElmer* Elm, double info[9], std::string txtfile,
                double energy, int n_events = 1000,
-               bool plot = true, const char* particle = "alpha") {
+               const char* particle = "alpha", bool plot = true) {
+
 
   // GEM Dimensions in cm
   const double T_DIE = info[4];
@@ -249,6 +250,84 @@ void LaunchParticle(ComponentElmer* Elm, double info[9], std::string txtfile,
     TCanvas* c2 = new TCanvas();
     hEne-> GetXaxis() -> SetTitle("Energy Loss [keV]");
     hEne -> Draw();
+  }
+}
+
+
+void EnergyResolution(ComponentElmer* Elm, double info[9], std::string txtfile,
+                      double energy, int n_events = 1) {
+  // Lauching a photon, non-parallel calculation
+
+
+  // GEM Dimensions in cm
+  const double T_DIE = info[4];
+  const double T_PLA = info[5];
+  const double DIST = info[1];
+  const double H = sqrt(3) * DIST / 2;
+  const double D_E = info[2];
+  const double D_P = info[3];
+
+  const double Z_AXIS = -1 * (D_P + T_DIE / 2 + T_PLA);
+
+
+  // Initial Parameters for Track
+  double x0 = (2 * RndmUniform() - 1) * DIST / 2;
+  double y0 = (2 * RndmUniform() - 1) * H / 2;
+  double z0 = T_DIE / 2 + T_PLA + D_E - 0.01;
+  double t0 = 0.;
+  double dx0 = 2 * RndmUniform() - 1;
+  double dy0 = 2 * RndmUniform() - 1;
+  double dz0 = -1;
+  int nel = -1;   // Number of Electrons Produced
+
+
+  // Sensor
+  Sensor* sensor = new Sensor();
+  sensor -> AddComponent(Elm);
+  sensor -> SetArea(-2 * DIST, -2 * H, Z_AXIS, 2 * DIST, 2 * H, z0);
+
+  // Avalanche and Drift Setup
+  AvalancheMicroscopic* aval = new AvalancheMicroscopic();
+  aval -> SetSensor(sensor);
+  aval -> SetCollisionSteps(100);
+  // aval -> EnableAvalancheSizeLimit(10);
+
+  // Setup Track
+  TrackHeed* track = new TrackHeed();
+  track -> SetSensor(sensor);
+
+  for (int i = n_events; i--;) {
+    int nf = 0;
+    track -> TransportPhoton(x0, y0, z0, t0, energy, dx0, dy0, dz0, nel);
+
+    for (int j = 0; j < nel; j++) {
+      // Properties of electron (pos, time, energy, velocity vector)
+      double xe1, ye1, ze1, te1, e1, dxe, dye, dze;
+      track -> GetElectron(j, xe1, ye1, ze1, te1, e1, dxe, dye, dze);
+
+      aval -> AvalancheElectron(xe1, ye1, ze1, 0, 0, 0., 0., 0.);
+      int np = aval -> GetNumberOfElectronEndpoints();
+
+      // Final Positions Analysis
+      double xe2, ye2, ze2, te2, e2;
+      double xe3, ye3, ze3, te3, e3;
+      int status;
+      for (int k = np; k--;) {
+        aval -> GetElectronEndpoint(k, xe2, ye2, ze2, te2, e2,
+                                    xe3, ye3, ze3, te3, e3, status);
+
+        if (ze3 <= Z_AXIS + 0.001) {  // Added a delta to minimize border effects
+          nf += 1;
+        }
+      }
+    }
+
+    // Saving on txt file
+    FILE* file;
+    const char* f_title = txtfile.c_str();
+    file = fopen(f_title, "a");
+    fprintf(file, "%d\n", nf);
+    fclose(file);
   }
 }
 
