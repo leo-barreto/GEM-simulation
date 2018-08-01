@@ -256,7 +256,7 @@ void LaunchParticle(ComponentElmer* Elm, double info[9], std::string txtfile,
 
 void EnergyResolution(ComponentElmer* Elm, double info[9], std::string txtfile,
                       double energy, int n_events = 1) {
-  // Lauching a photon, non-parallel calculation
+  // Launching a photon, non-parallel calculation
 
 
   // GEM Dimensions in cm

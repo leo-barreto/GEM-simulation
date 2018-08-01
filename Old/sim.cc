@@ -35,7 +35,7 @@ int main(int argc, char * argv[]) {
     const double T_PLA = 0.0005;             // Plates Thickness
     const double DIST = 0.0140;              // Distance Between Holes
     const double H = sqrt(3) * DIST / 2;     // Height
-    const double D_E = 0.1;                  // Distance to Electrode
+    const double D_E = 0.3;                  // Distance to Electrode
     const double D_P = 0.1;                  // Distance to Pad
 
     const double Eind = 4000;                // Induction Field [V/cm]
@@ -50,11 +50,11 @@ int main(int argc, char * argv[]) {
 
 
     // Import from Elmer
-    ComponentElmer* elm = new ComponentElmer("gem100_140_400/mesh.header",
-                                             "gem100_140_400/mesh.elements",
-                                             "gem100_140_400/mesh.nodes",
-                                             "gem100_140_400/dielectrics.dat",
-                                             "gem100_140_400/gem.result", "mm");
+    ComponentElmer* elm = new ComponentElmer("gem70_140_1000/mesh.header",
+                                             "gem70_140_1000/mesh.elements",
+                                             "gem70_140_1000/mesh.nodes",
+                                             "gem70_140_1000/dielectrics.dat",
+                                             "gem70_140_1000/gem.result", "mm");
 
     elm -> EnablePeriodicityX();
     elm -> EnableMirrorPeriodicityY();
@@ -69,10 +69,10 @@ int main(int argc, char * argv[]) {
     vF -> SetCanvas(cFie);
     vF -> SetComponent(elm);
     vF -> SetPlane(0, -1, 0, 0, H / 2, 0);
-    vF -> SetArea(-0.5 * DIST, -2 * T_DIE, 0.5 * DIST, 2 * T_DIE);
+    vF -> SetArea(-0.5 * DIST, 0.19, 0.5 * DIST, 0.21);
     //vF -> SetNumberOfContours(80);
     //vF -> SetNumberOfSamples2d(60, 60);
-    vF -> SetVoltageRange(-300., -50.);
+    vF -> SetVoltageRange(-1500., -300.);
     vF -> PlotContour("v");
 
 

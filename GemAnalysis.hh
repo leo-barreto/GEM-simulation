@@ -23,6 +23,10 @@
 #include "AvalancheMC.hh"
 #include "Random.hh"
 #include "TrackHeed.hh"
+#include "ViewField.hh"
+#include "Plotting.hh"
+#include "ViewFEMesh.hh"
+
 
 
 using namespace Garfield;
@@ -101,6 +105,40 @@ void ReadTXTGain(std::string txtfolder) {
   std::cout << "\nFinished saving all histograms!\n" << std::endl;
 
 }
+
+
+void PlotElectricField(ComponentElmer* Elm, double info[9]) {
+
+  // GEM Dimensions in cm
+  const double T_DIE = info[4];
+  const double T_PLA = info[5];
+  const double DIST = info[1];
+  const double H = sqrt(3) * DIST / 2;
+  const double D_E = info[2];
+  const double D_P = info[3];
+
+  // Electric Properties in V and V/cm
+  const double EIND = info[6];
+  const double EDRI = info[7];
+  const double VGEM = info[8];
+
+  double Vup = -1.1 * (EIND * D_P + VGEM);
+  double Vlow = -0.9 * (EIND * D_P);
+  double Center = (D_E - D_P) / 2;
+
+  // Visualization of Fields
+  TCanvas* cFie = new TCanvas("fie", "Field");
+  ViewField* vF = new ViewField();
+
+  vF -> SetCanvas(cFie);
+  vF -> SetComponent(Elm);
+  vF -> SetPlane(0, -1, 0, 0, H / 2, 0);
+  vF -> SetArea(-0.5 * DIST, -1 * T_DIE - Center, 0.5 * DIST, T_DIE - Center);
+  vF -> SetVoltageRange(Vup, Vlow);
+  vF -> PlotContour("v");
+
+}
+
 
 
 
