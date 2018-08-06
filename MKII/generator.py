@@ -7,7 +7,7 @@ import time
 # Parameters
 # Options (what to generate)
 GEN_GEOMETRY = True
-GEN_FIELDS = True
+GEN_FIELDS = False
 
 # Geometry in mm
 RADIUS = 0.035

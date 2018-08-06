@@ -93,10 +93,19 @@ void ReadTXTGain(std::string txtfolder) {
       hEGain -> Fill(EGain[i]);
     }
 
-    std::cout << "\nFilled histograms for " << txts[i] << std::endl;
+    std::cout << "\n\nFilled histograms for " << txts[i] << std::endl;
     hRGain -> Write();
     hEGain -> Write();
     std::cout << "Saved histograms for " << txts[i] << std::endl;
+
+    double m1, m2, s1, s2;
+    m1 = hRGain -> GetMean();
+    m2 = hEGain -> GetMean();
+    s1 = hRGain -> GetStdDev() / sqrt(hRGain -> GetEntries());
+    s2 = hEGain -> GetStdDev() / sqrt(hEGain -> GetEntries());
+    std::cout << "Real Gain: " << m1 << "(" << s1 << ")" << std::endl;
+    std::cout << "Effective Gain: " << m2 << "(" << s2 << ")" << std::endl;
+    std::cout << "Number of Entries: " << hRGain -> GetEntries() << std::endl;
 
   }
 
@@ -122,8 +131,8 @@ void PlotElectricField(ComponentElmer* Elm, double info[9]) {
   const double EDRI = info[7];
   const double VGEM = info[8];
 
-  double Vup = -1.1 * (EIND * D_P + VGEM);
-  double Vlow = -0.9 * (EIND * D_P);
+  double Vup = -1.5 * (EIND * D_P + VGEM);
+  double Vlow = -0.8 * (EIND * D_P);
   double Center = (D_E - D_P) / 2;
 
   // Visualization of Fields
@@ -133,9 +142,9 @@ void PlotElectricField(ComponentElmer* Elm, double info[9]) {
   vF -> SetCanvas(cFie);
   vF -> SetComponent(Elm);
   vF -> SetPlane(0, -1, 0, 0, H / 2, 0);
-  vF -> SetArea(-0.5 * DIST, -1 * T_DIE - Center, 0.5 * DIST, T_DIE - Center);
-  vF -> SetVoltageRange(Vup, Vlow);
-  vF -> PlotContour("v");
+  vF -> SetArea(-0.5 * DIST, -0.02 - Center, 0.5 * DIST, 0.02 - Center);
+  vF -> SetVoltageRange(-350, 0.);
+  vF -> PlotContour();
 
 }
 

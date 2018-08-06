@@ -82,12 +82,19 @@ ComponentElmer* LoadGas(std::string folder, double percent = 70.,
    gas -> DisablePenningTransfer();
   }
 
-  elm -> SetMedium(0, gas);
+  //elm -> SetMedium(0, gas);
+  int nMaterials = elm -> GetNumberOfMaterials();
+  for (int i = 0; i < nMaterials; ++i) {
+    double eps = elm -> GetPermittivity(i);
+    if (eps == 1.) {
+      elm -> SetMedium(i, gas);
+    }
+  }
+  elm -> PrintMaterials();
 
   return elm;
 
 }
-
 
 
 void Gain(ComponentElmer* Elm, double info[9], std::string txtfile,
@@ -102,8 +109,9 @@ void Gain(ComponentElmer* Elm, double info[9], std::string txtfile,
   const double D_E = info[2];
   const double D_P = info[3];
 
-  const double Z_AXIS = -1 * (D_P + T_DIE / 2 + T_PLA);
-  const double electron_pos = T_DIE / 2 + T_PLA + (0.1 + 0.8 * RndmUniform()) * D_E;
+  const double Center = (D_E - D_P) / 2;
+  const double Z_AXIS = -1 * (D_P + T_DIE / 2 + T_PLA) - Center;
+  const double electron_pos = T_DIE / 2 + T_PLA + (0.1 + 0.7 * RndmUniform()) * D_E - Center;
 
 
   // Sensor
@@ -175,13 +183,14 @@ void LaunchParticle(ComponentElmer* Elm, double info[9], std::string txtfile,
   const double D_E = info[2];
   const double D_P = info[3];
 
-  const double Z_AXIS = -1 * (D_P + T_DIE / 2 + T_PLA);
+  const double Center = (D_E - D_P) / 2;
+  const double Z_AXIS = -1 * (D_P + T_DIE / 2 + T_PLA) - Center;
 
 
   // Initial Parameters for Track
   double x0 = (2 * RndmUniform() - 1) * DIST / 2;
   double y0 = (2 * RndmUniform() - 1) * H / 2;
-  double z0 = T_DIE / 2 + T_PLA + D_E - 0.01;
+  double z0 = T_DIE / 2 + T_PLA + D_E - 0.01 - Center;
   double t0 = 0.;
   double dx0 = 2 * RndmUniform() - 1;
   double dy0 = 2 * RndmUniform() - 1;
@@ -267,13 +276,14 @@ void EnergyResolution(ComponentElmer* Elm, double info[9], std::string txtfile,
   const double D_E = info[2];
   const double D_P = info[3];
 
-  const double Z_AXIS = -1 * (D_P + T_DIE / 2 + T_PLA);
+  const double Center = (D_E - D_P) / 2;
+  const double Z_AXIS = -1 * (D_P + T_DIE / 2 + T_PLA) - Center;
 
 
   // Initial Parameters for Track
   double x0 = (2 * RndmUniform() - 1) * DIST / 2;
   double y0 = (2 * RndmUniform() - 1) * H / 2;
-  double z0 = T_DIE / 2 + T_PLA + D_E - 0.01;
+  double z0 = T_DIE / 2 + T_PLA + D_E - 0.01 - Center;
   double t0 = 0.;
   double dx0 = 2 * RndmUniform() - 1;
   double dy0 = 2 * RndmUniform() - 1;
