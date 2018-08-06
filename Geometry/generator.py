@@ -19,8 +19,8 @@ DISTANCE_PAD = 1.
 DISTANCE_ELE = 3.
 
 # Electric Field in V/cm; Potential in V.
-E_DIFF = 0
-E_IND = 0
+E_DIFF = 2000
+E_IND = 2000
 DELTA_V = 300
 PERMITTIVITY_DIE = 3.23 #relative
 
@@ -61,7 +61,7 @@ if GEN_FIELDS:
     print('\nWriting dieletrics.dat...')
     dielectric = open(geo_name + '/' + 'dielectrics.dat', 'w')
     dielectric.write('''4
-1 3.23
+1 1
 2 ''' + str(PERMITTIVITY_DIE) + '''
 3 1e10
 4 1e10''')

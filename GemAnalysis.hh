@@ -131,9 +131,10 @@ void PlotElectricField(ComponentElmer* Elm, double info[9]) {
   const double EDRI = info[7];
   const double VGEM = info[8];
 
-  double Vup = -1.5 * (EIND * D_P + VGEM);
-  double Vlow = -0.8 * (EIND * D_P);
+  double Vup = -1.1 * (EIND * D_P + VGEM);
+  double Vlow = -0.9 * (EIND * D_P);
   double Center = (D_E - D_P) / 2;
+  double Shift = DIST / 4;
 
   // Visualization of Fields
   TCanvas* cFie = new TCanvas("fie", "Field");
@@ -142,9 +143,41 @@ void PlotElectricField(ComponentElmer* Elm, double info[9]) {
   vF -> SetCanvas(cFie);
   vF -> SetComponent(Elm);
   vF -> SetPlane(0, -1, 0, 0, H / 2, 0);
-  vF -> SetArea(-0.5 * DIST, -0.02 - Center, 0.5 * DIST, 0.02 - Center);
-  vF -> SetVoltageRange(-350, 0.);
+  vF -> SetArea(-1.5 * DIST + Shift, -0.02 - Center, 1.5 * DIST + Shift, 0.02 - Center);
+  vF -> SetVoltageRange(Vup, Vlow);
   vF -> PlotContour();
+
+}
+
+
+void PlotMesh(ComponentElmer* Elm, double info[9]) {
+
+  // GEM Dimensions in cm
+  const double T_DIE = info[4];
+  const double T_PLA = info[5];
+  const double DIST = info[1];
+  const double H = sqrt(3) * DIST / 2;
+  const double D_E = info[2];
+  const double D_P = info[3];
+
+  double Center = (D_E - D_P) / 2;
+
+  // Visualization of Geometry
+  TCanvas *cGeo = new TCanvas("geo", "Geometry");
+  ViewFEMesh* vFE = new ViewFEMesh();
+
+  vFE -> SetCanvas(cGeo);
+  vFE -> SetComponent(Elm);
+  vFE -> SetPlane(0, -1, 0, 0, H / 2, 0);
+  vFE -> SetFillMesh(true);
+  vFE -> SetColor(1, kCyan - 3);
+  vFE -> SetColor(2, kOrange + 7);
+  vFE -> SetColor(3, kOrange + 7);
+  vFE -> EnableAxes();
+  vFE -> SetXaxisTitle("x (cm)");
+  vFE -> SetYaxisTitle("z (cm)");
+  vFE -> SetArea(-1.5 * DIST, -3 * T_DIE - Center, 0., 1.5 * DIST, 3 * T_DIE - Center, 0.);
+  vFE -> Plot();
 
 }
 

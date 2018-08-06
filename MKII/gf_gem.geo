@@ -11,7 +11,7 @@ DISTANCE_ELE = 1.;
 
 Function gf_gem
   H = Sqrt(3) * DISTANCE_HOLES / 2;
-  
+
   // Characteristic Distances
   lc_D = DISTANCE_HOLES / 15;
   lc_P = DISTANCE_HOLES / 15;

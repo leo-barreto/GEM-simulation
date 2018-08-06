@@ -58,8 +58,9 @@ ComponentElmer* LoadGas(std::string folder, double percent = 70.,
                                           folder + "/mesh.nodes",
                                           folder + "/dielectrics.dat",
                                           folder + "/gem.result", "mm");
-  elm -> EnablePeriodicityX();
+  elm -> EnableMirrorPeriodicityX();
   elm -> EnableMirrorPeriodicityY();
+  elm -> PrintRange();
 
 
   double o2 = ppm * 1E-4;
