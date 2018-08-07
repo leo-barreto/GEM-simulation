@@ -12,9 +12,9 @@ int main(int argc, char * argv[]) {
   string txt = "gainhole";
   string hR = "hRGain_h";
   string hE = "hEGain_h";
-  int N = 12;
-  double diam[N] = {20., 30., 40., 50., 60., 70., 80., 90., 100., 110., 120., 130.};
-  double erdiam[N] = {0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.};
+  int N = 9;
+  double diam[N] = {40., 50., 60., 70., 80., 90., 100., 110., 120.};
+  double erdiam[N] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
   double rg[N], eg[N], err[N], ere[N], perc[N], erperc[N];
 
   // ROOT File
@@ -50,6 +50,7 @@ int main(int argc, char * argv[]) {
     erperc[i] = sp;
   }
 
+
   // Gain/Geometry Graph Properties
   TCanvas* c = new TCanvas();
   c -> SetLogy();
@@ -71,7 +72,7 @@ int main(int argc, char * argv[]) {
   g -> GetYaxis() -> SetTitle("Ganho");
 
   // Legend
-  TLegend *leg = new TLegend(0.1, 0.8, 0.3, 0.9);
+  TLegend *leg = new TLegend(0.6, 0.8, 0.9, 0.9);
   leg -> AddEntry(realg, "Ganho Real", "p");
   leg -> AddEntry(effeg, "Ganho Efetivo", "p");
   leg -> Draw();

@@ -118,7 +118,7 @@ void Gain(ComponentElmer* Elm, double info[9], std::string txtfile,
   // Sensor
   Sensor* sensor = new Sensor();
   sensor -> AddComponent(Elm);
-  sensor -> SetArea(-DIST, -H, Z_AXIS, DIST, H, electron_pos + 0.01);
+  sensor -> SetArea(-5 * DIST, -5 * H, Z_AXIS, 5 * DIST, 5 * H, electron_pos + 0.01);
 
 
   // Avalanche and Drift Setup
@@ -201,7 +201,7 @@ void LaunchParticle(ComponentElmer* Elm, double info[9], std::string txtfile,
   // Sensor
   Sensor* sensor = new Sensor();
   sensor -> AddComponent(Elm);
-  sensor -> SetArea(-2 * DIST, -2 * H, Z_AXIS, 2 * DIST, 2 * H, z0);
+  sensor -> SetArea(-5 * DIST, -5 * H, Z_AXIS, 5 * DIST, 5 * H, z0);
 
 
   // Histograms
@@ -295,13 +295,12 @@ void EnergyResolution(ComponentElmer* Elm, double info[9], std::string txtfile,
   // Sensor
   Sensor* sensor = new Sensor();
   sensor -> AddComponent(Elm);
-  sensor -> SetArea(-2 * DIST, -2 * H, Z_AXIS, 2 * DIST, 2 * H, z0);
+  sensor -> SetArea(-5 * DIST, -5 * H, Z_AXIS, 5 * DIST, 5 * H, z0);
 
   // Avalanche and Drift Setup
   AvalancheMicroscopic* aval = new AvalancheMicroscopic();
   aval -> SetSensor(sensor);
   aval -> SetCollisionSteps(100);
-  // aval -> EnableAvalancheSizeLimit(10);
 
   // Setup Track
   TrackHeed* track = new TrackHeed();
@@ -310,6 +309,7 @@ void EnergyResolution(ComponentElmer* Elm, double info[9], std::string txtfile,
   for (int i = n_events; i--;) {
     int nf = 0;
     track -> TransportPhoton(x0, y0, z0, t0, energy, dx0, dy0, dz0, nel);
+    //std::cout << "Number of Primary Electrons: " << nel << std::endl;
 
     for (int j = 0; j < nel; j++) {
       // Properties of electron (pos, time, energy, velocity vector)

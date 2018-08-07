@@ -116,6 +116,84 @@ void ReadTXTGain(std::string txtfolder) {
 }
 
 
+void ReadTXTEnergyResolution(std::string txtfolder) {
+
+  std::string folder = "./" + txtfolder;
+  DIR* dir = opendir(folder.c_str());
+  dirent* pdir;
+  std::vector<std::string> txts;
+  std::string line;
+  int ne;
+  std::string rootname = folder + "_hists.root";
+
+
+  // Getting all files of folder
+  while (pdir = readdir(dir)) {
+    std::string fn = pdir -> d_name;
+    if (fn != "." and fn != "..") {
+      txts.push_back(fn);
+    }
+  }
+
+  TFile* f = new TFile(rootname.c_str(), "RECREATE");
+  chdir(folder.c_str());
+
+  for (int i = 0; i < txts.size(); i++) {
+    std::ifstream File;
+    File.open(txts[i].c_str());
+    std::vector<int> NElectrons;
+
+    if (File.fail()) {
+      std::cerr << "\nFailed to open file\n" << std::endl;
+      exit(1);
+    }
+
+    while (!File.eof()) {
+      File >> line;
+      ne = stod(line);
+      if (ne != 0) {        
+        NElectrons.push_back(ne);
+      }
+    }
+
+    // Popping last duplicated elements
+    NElectrons.pop_back();
+
+    // Histograms
+    int nBins = 100;
+    float hmin = 0.;
+    float hmaxN = *max_element(NElectrons.begin(), NElectrons.end());
+    std::string name_r = "hNElectrons_" + txts[i].substr(0, txts[i].size() - 4);
+
+    TH1I* hNElectrons = new TH1I(name_r.c_str(), "Number of Electrons Detected", nBins, hmin, hmaxN);
+
+    for (int i = 0; i < NElectrons.size(); i++) {
+      hNElectrons -> Fill(NElectrons[i]);
+    }
+
+    std::cout << "\n\nFilled histograms for " << txts[i] << std::endl;
+    hNElectrons -> Write();
+    std::cout << "Saved histograms for " << txts[i] << std::endl;
+
+    double m1, m2, m3, s1, s2;
+    m1 = hNElectrons -> GetMean();
+    s1 = hNElectrons -> GetStdDev() / sqrt(hNElectrons -> GetEntries());
+    m2 = hNElectrons -> GetStdDev();
+    m3 = m2 / m1;
+    s2 = s1 / (m1 * m1);
+    std::cout << "Mean: " << m1 << "(" << s1 << ")" << std::endl;
+    std::cout << "Std: " << m2 << std::endl;
+    std::cout << "Relative Energy Resolution: " << m3 << "(" << s2 << ")" << std::endl;
+    std::cout << "Number of Entries: " << hNElectrons -> GetEntries() << std::endl;
+
+  }
+
+  f -> Close();
+  chdir("..");
+  std::cout << "\nFinished saving all histograms!\n" << std::endl;
+
+}
+
 void PlotElectricField(ComponentElmer* Elm, double info[9]) {
 
   // GEM Dimensions in cm
@@ -143,7 +221,7 @@ void PlotElectricField(ComponentElmer* Elm, double info[9]) {
   vF -> SetCanvas(cFie);
   vF -> SetComponent(Elm);
   vF -> SetPlane(0, -1, 0, 0, H / 2, 0);
-  vF -> SetArea(-1.5 * DIST + Shift, -0.02 - Center, 1.5 * DIST + Shift, 0.02 - Center);
+  vF -> SetArea(-1.5 * DIST + Shift, -0.1, 1.5 * DIST + Shift, 0.1);
   vF -> SetVoltageRange(Vup, Vlow);
   vF -> PlotContour();
 

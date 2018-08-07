@@ -16,11 +16,11 @@ DISTANCE_HOLES = 0.140
 THICKNESS_DIE = 0.05
 THICKNESS_PLA = 0.005
 DISTANCE_PAD = 1.
-DISTANCE_ELE = 1.
+DISTANCE_ELE = 3.
 
 # Electric Field in V/cm; Potential in V.
-E_DIFF = 1000
-E_IND = 3000
+E_DRI = 1300
+E_IND = 4000
 DELTA_V = 500
 PERMITTIVITY_DIE = 3.23 # relative
 
@@ -146,7 +146,7 @@ End
 Boundary Condition 1
   Target Boundaries = 5
   Potential = ''' + str(-0.1 * E_IND * DISTANCE_PAD - DELTA_V + \
-                        -0.1 * E_DIFF * DISTANCE_ELE) + '''
+                        -0.1 * E_DRI * DISTANCE_ELE) + '''
 End
 
 ! Upper copper plate
