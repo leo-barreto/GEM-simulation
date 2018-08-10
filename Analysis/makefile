@@ -33,3 +33,8 @@ gpenn: gpenn.cc
 	$(CXX) $(CFLAGS) -c gpenn.cc
 	$(CXX) $(CFLAGS) -o gpenn gpenn.o $(LDFLAGS)
 	rm gpenn.o
+
+erdrift: erdrift.cc
+	$(CXX) $(CFLAGS) -c erdrift.cc
+	$(CXX) $(CFLAGS) -o erdrift erdrift.o $(LDFLAGS)
+	rm erdrift.o

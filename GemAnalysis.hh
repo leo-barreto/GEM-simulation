@@ -151,7 +151,7 @@ void ReadTXTEnergyResolution(std::string txtfolder) {
     while (!File.eof()) {
       File >> line;
       ne = stod(line);
-      if (ne != 0) {        
+      if (ne != 0) {
         NElectrons.push_back(ne);
       }
     }
@@ -160,12 +160,12 @@ void ReadTXTEnergyResolution(std::string txtfolder) {
     NElectrons.pop_back();
 
     // Histograms
-    int nBins = 100;
+    int nBins = 50;
     float hmin = 0.;
     float hmaxN = *max_element(NElectrons.begin(), NElectrons.end());
     std::string name_r = "hNElectrons_" + txts[i].substr(0, txts[i].size() - 4);
 
-    TH1I* hNElectrons = new TH1I(name_r.c_str(), "Number of Electrons Detected", nBins, hmin, hmaxN);
+    TH1I* hNElectrons = new TH1I(name_r.c_str(), "", nBins, hmin, hmaxN);
 
     for (int i = 0; i < NElectrons.size(); i++) {
       hNElectrons -> Fill(NElectrons[i]);
@@ -180,7 +180,7 @@ void ReadTXTEnergyResolution(std::string txtfolder) {
     s1 = hNElectrons -> GetStdDev() / sqrt(hNElectrons -> GetEntries());
     m2 = hNElectrons -> GetStdDev();
     m3 = m2 / m1;
-    s2 = s1 / (m1 * m1);
+    s2 = s1 * m2/ (m1 * m1);
     std::cout << "Mean: " << m1 << "(" << s1 << ")" << std::endl;
     std::cout << "Std: " << m2 << std::endl;
     std::cout << "Relative Energy Resolution: " << m3 << "(" << s2 << ")" << std::endl;

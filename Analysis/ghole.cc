@@ -66,7 +66,7 @@ int main(int argc, char * argv[]) {
 
   g -> Add(realg);
   g -> Add(effeg);
-  g -> SetTitle("Ganho para diferentes Geometrias (#DeltaV_{GEM} = 500 V)");
+  //g -> SetTitle("Ganho para diferentes Geometrias (#DeltaV_{GEM} = 500 V)");
   g -> Draw("ap");
   g -> GetXaxis() -> SetTitle("Di#hat{a}metro [#mum]");
   g -> GetYaxis() -> SetTitle("Ganho");
@@ -83,10 +83,10 @@ int main(int argc, char * argv[]) {
 
   percent -> SetMarkerColor(kBlue);
   percent -> SetMarkerStyle(21);
-  percent -> SetTitle("Comparac#tilde{a}o entre Ganho Real e Efetivo (#DeltaV_{GEM} = 500 V)");
+  percent -> SetTitle("");
   percent -> Draw("ap");
   percent -> GetXaxis() -> SetTitle("Di#hat{a}metro [#mum]");
-  percent -> GetYaxis() -> SetTitle("Efetivo / Real %");
+  percent -> GetYaxis() -> SetTitle("Efetivo / Real");
 
   cout << "\nDone!" << endl;
   app.Run(kTRUE);
