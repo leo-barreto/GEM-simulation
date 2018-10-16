@@ -70,11 +70,21 @@ int main(int argc, char * argv[]) {
   g -> Draw("ap");
   g -> GetXaxis() -> SetTitle("Di#hat{a}metro [#mum]");
   g -> GetYaxis() -> SetTitle("Ganho");
+  TLine *line = new TLine(60, 1010, 120, 80);
+  line -> SetLineColor(kBlack);
+  line -> Draw();
+
+  TLine *line2 = new TLine(60, 300, 120, 15);
+  line2 -> SetLineColor(kViolet);
+  line2 -> Draw();
+
 
   // Legend
   TLegend *leg = new TLegend(0.6, 0.8, 0.9, 0.9);
   leg -> AddEntry(realg, "Ganho Real", "p");
   leg -> AddEntry(effeg, "Ganho Efetivo", "p");
+  leg -> AddEntry(line, "Curva Experimental Ganho Real", "l");
+  leg -> AddEntry(line2, "Curva Experimental Ganho Efetivo", "l");
   leg -> Draw();
 
   // Effective/Real Graph Properties

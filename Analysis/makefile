@@ -38,3 +38,8 @@ erdrift: erdrift.cc
 	$(CXX) $(CFLAGS) -c erdrift.cc
 	$(CXX) $(CFLAGS) -o erdrift erdrift.o $(LDFLAGS)
 	rm erdrift.o
+
+ertension: ertension.cc
+	$(CXX) $(CFLAGS) -c ertension.cc
+	$(CXX) $(CFLAGS) -o ertension ertension.o $(LDFLAGS)
+	rm ertension.o

@@ -173,7 +173,7 @@ void Gain(ComponentElmer* Elm, double info[9], std::string txtfile,
 
 void LaunchParticle(ComponentElmer* Elm, double info[9], std::string txtfile,
                double energy, int n_events = 1000,
-               const char* particle = "alpha", bool plot = true) {
+               const char* particle = "alpha", bool plot = false) {
 
 
   // GEM Dimensions in cm
@@ -201,7 +201,7 @@ void LaunchParticle(ComponentElmer* Elm, double info[9], std::string txtfile,
   // Sensor
   Sensor* sensor = new Sensor();
   sensor -> AddComponent(Elm);
-  sensor -> SetArea(-5 * DIST, -5 * H, Z_AXIS, 5 * DIST, 5 * H, z0);
+  sensor -> SetArea(-10 * DIST, -10 * H, Z_AXIS, 10 * DIST, 10 * H, z0);
 
 
   // Histograms
@@ -295,7 +295,7 @@ void EnergyResolution(ComponentElmer* Elm, double info[9], std::string txtfile,
   // Sensor
   Sensor* sensor = new Sensor();
   sensor -> AddComponent(Elm);
-  sensor -> SetArea(-5 * DIST, -5 * H, Z_AXIS, 5 * DIST, 5 * H, z0);
+  sensor -> SetArea(-10 * DIST, -10 * H, Z_AXIS, 10 * DIST, 10 * H, z0);
 
   // Avalanche and Drift Setup
   AvalancheMicroscopic* aval = new AvalancheMicroscopic();
@@ -342,6 +342,167 @@ void EnergyResolution(ComponentElmer* Elm, double info[9], std::string txtfile,
   }
 }
 
+void PositionResolution(ComponentElmer* Elm, double info[9], std::string txtfile,
+                        double energy, int n_events = 1,
+                        const char* particle = "alpha") {
 
+  // GEM Dimensions in cm
+  const double T_DIE = info[4];
+  const double T_PLA = info[5];
+  const double DIST = info[1];
+  const double H = sqrt(3) * DIST / 2;
+  const double D_E = info[2];
+  const double D_P = info[3];
+
+  const double Center = (D_E - D_P) / 2;
+  const double Z_AXIS = -1 * (D_P + T_DIE / 2 + T_PLA) - Center;
+
+
+  // Initial Parameters for Track
+  double x0 = 0;
+  double y0 = 0;
+  double z0 = T_DIE / 2 + T_PLA + D_E - 0.01 - Center;
+  double t0 = 0.;
+  double dx0 = 0;
+  double dy0 = 0;
+  double dz0 = -1;
+
+
+  // Sensor
+  Sensor* sensor = new Sensor();
+  sensor -> AddComponent(Elm);
+  sensor -> SetArea(-10 * DIST, -10 * H, Z_AXIS, 10 * DIST, 10 * H, z0);
+
+  // Avalanche and Drift Setup
+  AvalancheMicroscopic* aval = new AvalancheMicroscopic();
+  aval -> SetSensor(sensor);
+  aval -> SetCollisionSteps(100);
+
+  // Setup Track
+  TrackHeed* track = new TrackHeed();
+  track -> SetSensor(sensor);
+  track -> SetParticle(particle);
+  track -> SetEnergy(energy);
+
+  for (int i = n_events; i--;) {
+    track -> NewTrack(x0, y0, z0, t0, dx0, dy0, dz0);
+
+    // Cluster properties
+    double xc, yc, zc, tc, extra, ec;
+    int nc;
+    // Sum of all positions in x and y and electrons detected
+    double sumy = 0, sumx = 0;
+    int nf = 0;
+
+    // Loop over the clusters
+    while (track -> GetCluster(xc, yc, zc, tc, nc, ec, extra)) {
+      for (int j = 0; j < nc; j++) {
+        // Properties of electron (pos, time, energy, velocity vector)
+        double xe1, ye1, ze1, te1, e1, dxe, dye, dze;
+        double xe2, ye2, ze2, te2, e2;
+        double xe3, ye3, ze3, te3, e3;
+        int status;
+        track -> GetElectron(j, xe1, ye1, ze1, te1, e1, dxe, dye, dze);
+
+        aval -> AvalancheElectron(xe1, ye1, ze1, 0, 0, 0., 0., 0.);
+        int np = aval -> GetNumberOfElectronEndpoints();
+
+        // Final Positions Analysis
+        for (int k = np; k--;) {
+          aval -> GetElectronEndpoint(k, xe2, ye2, ze2, te2, e2,
+                                      xe3, ye3, ze3, te3, e3, status);
+
+          if (ze3 <= Z_AXIS + 0.001) {  // Added a delta to minimize border effects
+            nf++;
+            sumx += xe3;
+            sumy += ye3;
+          }
+        }
+      }
+    }
+
+    // Saving on txt file
+    FILE* file;
+    const char* f_title = txtfile.c_str();
+    file = fopen(f_title, "a");
+    fprintf(file, "%f;%f\n", sumx / nf, sumy / nf);
+    fclose(file);
+  }
+}
+
+
+void LaunchPhoton(ComponentElmer* Elm, double info[9], std::string txtfile,
+                      double energy, int n_events = 1) {
+  // Launching a photon, non-parallel calculation
+
+
+  // GEM Dimensions in cm
+  const double T_DIE = info[4];
+  const double T_PLA = info[5];
+  const double DIST = info[1];
+  const double H = sqrt(3) * DIST / 2;
+  const double D_E = info[2];
+  const double D_P = info[3];
+
+  const double Center = (D_E - D_P) / 2;
+  const double Z_AXIS = -1 * (D_P + T_DIE / 2 + T_PLA) - Center;
+
+
+  // Initial Parameters for Track
+  double x0 = (2 * RndmUniform() - 1) * DIST / 2;
+  double y0 = (2 * RndmUniform() - 1) * H / 2;
+  double z0 = T_DIE / 2 + T_PLA + D_E - 0.01 - Center;
+  double t0 = 0.;
+  double dx0 = 2 * RndmUniform() - 1;
+  double dy0 = 2 * RndmUniform() - 1;
+  double dz0 = -1;
+  int nel = -1;   // Number of Electrons Produced
+
+
+  // Sensor
+  Sensor* sensor = new Sensor();
+  sensor -> AddComponent(Elm);
+  sensor -> SetArea(-10 * DIST, -10 * H, Z_AXIS, 10 * DIST, 10 * H, z0);
+
+  // Avalanche and Drift Setup
+  AvalancheMicroscopic* aval = new AvalancheMicroscopic();
+  aval -> SetSensor(sensor);
+  aval -> SetCollisionSteps(100);
+
+  // Setup Track
+  TrackHeed* track = new TrackHeed();
+  track -> SetSensor(sensor);
+
+  for (int i = n_events; i--;) {
+    int nf = 0;
+    track -> TransportPhoton(x0, y0, z0, t0, energy, dx0, dy0, dz0, nel);
+    //std::cout << "Number of Primary Electrons: " << nel << std::endl;
+
+    for (int j = 0; j < nel; j++) {
+      // Properties of electron (pos, time, energy, velocity vector)
+      double xe1, ye1, ze1, te1, e1, dxe, dye, dze;
+      track -> GetElectron(j, xe1, ye1, ze1, te1, e1, dxe, dye, dze);
+
+      aval -> AvalancheElectron(xe1, ye1, ze1, 0, 0, 0., 0., 0.);
+      int np = aval -> GetNumberOfElectronEndpoints();
+
+      // Final Positions Analysis
+      double xe2, ye2, ze2, te2, e2;
+      double xe3, ye3, ze3, te3, e3;
+      int status;
+      for (int k = np; k--;) {
+        aval -> GetElectronEndpoint(k, xe2, ye2, ze2, te2, e2,
+                                    xe3, ye3, ze3, te3, e3, status);
+
+        FILE* file;
+        const char* f_title = txtfile.c_str();
+        file = fopen(f_title, "a");
+        fprintf(file, "%d;%f;%f;%f;%f;%f\n", i, xe3, ye3, ze3, te3, e3);
+        fclose(file);
+
+      }
+    }
+  }
+}
 
 #endif
