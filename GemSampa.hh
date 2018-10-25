@@ -31,7 +31,7 @@ void SetupInfo(double gem[9], double diam, double dist,
                double i_field, double d_field, double potential) {
 
 
- // Dimensions in cm, Fields in V/cm and Potentials in V
+ // Dimensions in cm (except diam and dist), Fields in V/cm and Potentials in V
   gem[0] = diam / 10000;    // Hole Diameter
   gem[1] = dist / 10000;    // Distance between Holes
   gem[2] = up;              // Drift Distance
@@ -51,6 +51,7 @@ ComponentElmer* LoadGas(std::string folder, double percent = 70.,
                         const char* noble = "ar",
                         double temp = 293.15, double press = 760.) {
   // Temperature (temp) in Kelvin and Pressure (press) in Torr
+
 
   // Import
   ComponentElmer* elm = new ComponentElmer(folder + "/mesh.header",
@@ -98,6 +99,7 @@ ComponentElmer* LoadGas(std::string folder, double percent = 70.,
 }
 
 
+
 void Gain(ComponentElmer* Elm, double info[9], std::string txtfile,
           int sizelimit = 10, int n_events = 100) {
 
@@ -130,6 +132,11 @@ void Gain(ComponentElmer* Elm, double info[9], std::string txtfile,
   }
 
 
+  // File
+  FILE* file;
+  const char* f_title = txtfile.c_str();
+
+
   // Avalanches Calculations
   for (int i = n_events; i--;) {
     const clock_t begin_time = clock();
@@ -156,8 +163,6 @@ void Gain(ComponentElmer* Elm, double info[9], std::string txtfile,
     }
 
     // Saving Gains
-    FILE* file;
-    const char* f_title = txtfile.c_str();
     file = fopen(f_title, "a");
     float min = float(clock () - begin_time) / (CLOCKS_PER_SEC * 60);
     fprintf(file, "%d;%d;%.2f\n", np, nf, min);
@@ -169,6 +174,7 @@ void Gain(ComponentElmer* Elm, double info[9], std::string txtfile,
 
   }
 }
+
 
 
 void LaunchParticle(ComponentElmer* Elm, double info[9], std::string txtfile,
@@ -210,11 +216,18 @@ void LaunchParticle(ComponentElmer* Elm, double info[9], std::string txtfile,
                         100, 0, 200);
   TH1F* hEne = new TH1F("hEne", "Energy Loss", 100, 0., 10.);
 
+
   // Setup Track
   TrackHeed* track = new TrackHeed();
   track -> SetSensor(sensor);
   track -> SetParticle(particle);
   track -> SetEnergy(energy);
+
+
+  // File
+  FILE* file;
+  const char* f_title = txtfile.c_str();
+
 
   for (int i = n_events; i--;) {
     track -> NewTrack(x0, y0, z0, t0, dx0, dy0, dz0);
@@ -233,14 +246,12 @@ void LaunchParticle(ComponentElmer* Elm, double info[9], std::string txtfile,
       for (int j = 0; j < nc; j++) {
         // Properties of electron (pos, time, energy, velocity vector)
         double xe1, ye1, ze1, te1, e1, dxe, dye, dze;
-        double xe2, ye2, ze2, te2, e2;
-        int status;
+        // double xe2, ye2, ze2, te2, e2;
+        // int status;
         track -> GetElectron(j, xe1, ye1, ze1, te1, e1, dxe, dye, dze);
 
         // Saving on txt file
         // Energy and velocity are not provided by Heed, so they are ignored
-        FILE* file;
-        const char* f_title = txtfile.c_str();
         file = fopen(f_title, "a");
         fprintf(file, "%d;%f;%f;%f;%f\n", i, xe1, ye1, ze1, te1);
         fclose(file);
@@ -262,6 +273,7 @@ void LaunchParticle(ComponentElmer* Elm, double info[9], std::string txtfile,
     hEne -> Draw();
   }
 }
+
 
 
 void EnergyResolution(ComponentElmer* Elm, double info[9], std::string txtfile,
@@ -297,14 +309,22 @@ void EnergyResolution(ComponentElmer* Elm, double info[9], std::string txtfile,
   sensor -> AddComponent(Elm);
   sensor -> SetArea(-10 * DIST, -10 * H, Z_AXIS, 10 * DIST, 10 * H, z0);
 
+
   // Avalanche and Drift Setup
   AvalancheMicroscopic* aval = new AvalancheMicroscopic();
   aval -> SetSensor(sensor);
   aval -> SetCollisionSteps(100);
 
+
   // Setup Track
   TrackHeed* track = new TrackHeed();
   track -> SetSensor(sensor);
+
+
+  // File
+  FILE* file;
+  const char* f_title = txtfile.c_str();
+
 
   for (int i = n_events; i--;) {
     int nf = 0;
@@ -333,14 +353,14 @@ void EnergyResolution(ComponentElmer* Elm, double info[9], std::string txtfile,
       }
     }
 
-    // Saving on txt file
-    FILE* file;
-    const char* f_title = txtfile.c_str();
+    // Saving on txt
     file = fopen(f_title, "a");
     fprintf(file, "%d\n", nf);
     fclose(file);
   }
 }
+
+
 
 void PositionResolution(ComponentElmer* Elm, double info[9], std::string txtfile,
                         double energy, int n_events = 1,
@@ -373,16 +393,24 @@ void PositionResolution(ComponentElmer* Elm, double info[9], std::string txtfile
   sensor -> AddComponent(Elm);
   sensor -> SetArea(-10 * DIST, -10 * H, Z_AXIS, 10 * DIST, 10 * H, z0);
 
+
   // Avalanche and Drift Setup
   AvalancheMicroscopic* aval = new AvalancheMicroscopic();
   aval -> SetSensor(sensor);
   aval -> SetCollisionSteps(100);
+
 
   // Setup Track
   TrackHeed* track = new TrackHeed();
   track -> SetSensor(sensor);
   track -> SetParticle(particle);
   track -> SetEnergy(energy);
+
+
+  // File
+  FILE* file;
+  const char* f_title = txtfile.c_str();
+
 
   for (int i = n_events; i--;) {
     track -> NewTrack(x0, y0, z0, t0, dx0, dy0, dz0);
@@ -421,14 +449,13 @@ void PositionResolution(ComponentElmer* Elm, double info[9], std::string txtfile
       }
     }
 
-    // Saving on txt file
-    FILE* file;
-    const char* f_title = txtfile.c_str();
+    // Saving on txt
     file = fopen(f_title, "a");
     fprintf(file, "%f;%f\n", sumx / nf, sumy / nf);
     fclose(file);
   }
 }
+
 
 
 void LaunchPhoton(ComponentElmer* Elm, double info[9], std::string txtfile,
@@ -464,17 +491,24 @@ void LaunchPhoton(ComponentElmer* Elm, double info[9], std::string txtfile,
   sensor -> AddComponent(Elm);
   sensor -> SetArea(-10 * DIST, -10 * H, Z_AXIS, 10 * DIST, 10 * H, z0);
 
+
   // Avalanche and Drift Setup
   AvalancheMicroscopic* aval = new AvalancheMicroscopic();
   aval -> SetSensor(sensor);
   aval -> SetCollisionSteps(100);
 
+
   // Setup Track
   TrackHeed* track = new TrackHeed();
   track -> SetSensor(sensor);
 
+
+  // File
+  FILE* file;
+  const char* f_title = txtfile.c_str();
+
+
   for (int i = n_events; i--;) {
-    int nf = 0;
     track -> TransportPhoton(x0, y0, z0, t0, energy, dx0, dy0, dz0, nel);
     //std::cout << "Number of Primary Electrons: " << nel << std::endl;
 
@@ -494,8 +528,6 @@ void LaunchPhoton(ComponentElmer* Elm, double info[9], std::string txtfile,
         aval -> GetElectronEndpoint(k, xe2, ye2, ze2, te2, e2,
                                     xe3, ye3, ze3, te3, e3, status);
 
-        FILE* file;
-        const char* f_title = txtfile.c_str();
         file = fopen(f_title, "a");
         fprintf(file, "%d;%f;%f;%f;%f;%f\n", i, xe3, ye3, ze3, te3, e3);
         fclose(file);
