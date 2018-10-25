@@ -19,10 +19,10 @@ DISTANCE_PAD = 1.
 DISTANCE_ELE = 3.
 
 # Electric Field in V/cm; Potential in V.
-E_DIFF = 2000
-E_IND = 2000
-DELTA_V = 300
-PERMITTIVITY_DIE = 3.23 #relative
+E_DRI = 1300
+E_IND = 4000
+DELTA_V = 500
+PERMITTIVITY_DIE = 3.23 # relative
 
 
 start = time.time()
@@ -142,29 +142,28 @@ Material 3
   Relative Permittivity = 1.0e10
 End
 
+! Upper electrode
+Boundary Condition 1
+  Target Boundaries = 5
+  Potential = ''' + str(-0.1 * E_IND * DISTANCE_PAD - DELTA_V + \
+                        -0.1 * E_DRI * DISTANCE_ELE) + '''
+End
 
 ! Upper copper plate
-Boundary Condition 1
-  Target Boundaries = 7
+Boundary Condition 2
+  Target Boundaries = 6
   Potential = ''' + str(-0.1 * E_IND * DISTANCE_PAD - DELTA_V) + '''
 End
 
 ! Lower copper plate
-Boundary Condition 2
-  Target Boundaries = 8
-  Potential = ''' + str(-0.1 * E_IND * DISTANCE_PAD) + '''
-End
-
-! Upper electrode
 Boundary Condition 3
-  Target Boundaries = 9
-  Potential = ''' + str(-0.1 * E_IND * DISTANCE_PAD - DELTA_V + \
-                        -0.1 * E_DIFF * DISTANCE_ELE) + '''
+  Target Boundaries = 7
+  Potential = ''' + str(-0.1 * E_IND * DISTANCE_PAD) + '''
 End
 
 ! Lower electrode
 Boundary Condition 4
-  Target Boundaries = 10
+  Target Boundaries = 8
   Potential = 0
 End
 
@@ -175,8 +174,9 @@ Boundary Condition 5
 End
 
 Boundary Condition 6
-  Target Boundaries = 5
+  Target Boundaries = 3
   Periodic BC = 5
+  Periodic BC Rotate(3) = Real 0 180 0
 End
 
 
@@ -186,18 +186,9 @@ Boundary Condition 7
 End
 
 Boundary Condition 8
-  Target Boundaries = 6
-  Periodic BC = 7
-End
-
-
-Boundary Condition 9
-  Target Boundaries = 3
-End
-
-Boundary Condition 10
   Target Boundaries = 4
-  Periodic BC = 9
+  Periodic BC = 7
+  Periodic BC Rotate(3) = Real 180 0 0
 End''')
 
     sif.close()
@@ -256,6 +247,7 @@ Solver 1
   Steady State Convergence Tolerance = 5.0e-7
 End
 
+
 ! Gas
 Material 1
   Relative Permittivity = 1
@@ -271,28 +263,27 @@ Material 3
   Relative Permittivity = 1.0e10
 End
 
+! Upper electrode
+Boundary Condition 1
+  Target Boundaries = 5
+  Potential = 0
+End
 
 ! Upper copper plate
-Boundary Condition 1
-  Target Boundaries = 7
+Boundary Condition 2
+  Target Boundaries = 6
   Potential = 0
 End
 
 ! Lower copper plate
-Boundary Condition 2
-  Target Boundaries = 8
-  Potential = 0
-End
-
-! Upper electrode
 Boundary Condition 3
-  Target Boundaries = 9
+  Target Boundaries = 7
   Potential = 0
 End
 
 ! Lower electrode
 Boundary Condition 4
-  Target Boundaries = 10
+  Target Boundaries = 8
   Potential = 1
 End
 
@@ -303,9 +294,11 @@ Boundary Condition 5
 End
 
 Boundary Condition 6
-  Target Boundaries = 5
+  Target Boundaries = 3
   Periodic BC = 5
+  Periodic BC Rotate(3) = Real 0 180 0
 End
+
 
 ! Periodicity in Y
 Boundary Condition 7
@@ -313,18 +306,9 @@ Boundary Condition 7
 End
 
 Boundary Condition 8
-  Target Boundaries = 6
-  Periodic BC = 7
-End
-
-
-Boundary Condition 9
-  Target Boundaries = 3
-End
-
-Boundary Condition 10
   Target Boundaries = 4
-  Periodic BC = 9
+  Periodic BC = 7
+  Periodic BC Rotate(3) = Real 180 0 0
 End''')
 
     WTsif.close()
