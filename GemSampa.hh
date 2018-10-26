@@ -139,7 +139,7 @@ void Gain(ComponentElmer* Elm, double info[9], std::string txtfile,
 
   // Avalanches Calculations
   for (int i = n_events; i--;) {
-    const clock_t begin_time = clock();
+    clock_t begin_time = clock();
 
     // Random Initial Positions
     double x0 = (2 * RndmUniform() - 1) * DIST / 2;
@@ -269,7 +269,7 @@ void LaunchParticle(ComponentElmer* Elm, double info[9], std::string txtfile,
     hEle -> Draw();
 
     TCanvas* c2 = new TCanvas();
-    hEne-> GetXaxis() -> SetTitle("Energy Loss [keV]");
+    hEne -> GetXaxis() -> SetTitle("Energy Loss [keV]");
     hEne -> Draw();
   }
 }

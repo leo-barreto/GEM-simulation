@@ -50,15 +50,15 @@ int main(int argc, char * argv[]) {
 
 
     // Import from Elmer
-    ComponentElmer* elm = new ComponentElmer("gem70_140_400/mesh.header",
-                                             "gem70_140_400/mesh.elements",
-                                             "gem70_140_400/mesh.nodes",
-                                             "gem70_140_400/dielectrics.dat",
-                                             "gem70_140_400/gem.result", "mm");
+    ComponentElmer* elm = new ComponentElmer("gem70_140_420/mesh.header",
+                                             "gem70_140_420/mesh.elements",
+                                             "gem70_140_420/mesh.nodes",
+                                             "gem70_140_420/dielectrics.dat",
+                                             "gem70_140_420/gem.result", "mm");
 
-    elm -> EnablePeriodicityX();
+    elm -> EnableMirrorPeriodicityX();
     elm -> EnableMirrorPeriodicityY();
-    elm -> SetWeightingField("gem70_140_400/gemWT.result", "wtlel");
+    elm -> SetWeightingField("gem70_140_420/gemWT.result", "wtlel");
     elm -> PrintRange();
 
 
