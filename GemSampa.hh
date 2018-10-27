@@ -164,7 +164,7 @@ void Gain(ComponentElmer* Elm, double info[9], std::string txtfile,
 
     // Saving Gains
     file = fopen(f_title, "a");
-    float min = float(clock () - begin_time) / (CLOCKS_PER_SEC * 60);
+    float min = float(clock() - begin_time) / (CLOCKS_PER_SEC * 60);
     fprintf(file, "%d;%d;%.2f\n", np, nf, min);
     fclose(file);
 

@@ -1,12 +1,17 @@
 // Example code for the analysis of a pion launched on a GEM detector
 #include "../../GemSampa.hh"
 #include <string>
+#include <vector>
+#include <fstream>
+#include <TH2F.h>
+#include <TCanvas.h>
 #include "ViewFEMesh.hh"
 
 using namespace Garfield;
 
 int main(int argc, char * argv[]) {
-
+  //TApplication app("app", &argc, argv);
+  clock_t begin_time = clock();
 
   double g[9];                  // GEM info list
   std::string GEM = "gem70_140_420";   // GEM folder
@@ -43,15 +48,40 @@ int main(int argc, char * argv[]) {
   const double dz0 = -1;
 
 
+  // Given the velocity vector and approximating the particle trajectory as a
+  // line, we can reduce the volume in which tracks are calculated
+  // (sensor area) for efficiency
+  double delta = 3 * g[1];
+  double tgx = fabs(dx0 / dz0);
+  double tgy = fabs(dy0 / dz0);
+  double xmax, xmin, ymax, ymin;
+  if (dx0 >= 0.) {
+    xmax = z0 * tgx + delta;
+    xmin = -delta;
+  }
+  else {
+    xmax = delta;
+    xmin = -z0 * tgx - delta;
+  }
+  if (dy0 >= 0.) {
+    ymax = z0 * tgy + delta;
+    ymin = -delta;
+  }
+  else {
+    ymax = delta;
+    ymin = -z0 * tgy - delta;
+  }
+
+
   // Sensor
   Sensor* sensor = new Sensor();
   sensor -> AddComponent(elm);
-  sensor -> SetArea(-10 * g[1], -10 * H, Z_AXIS, 10 * g[1], 10 * H, z0);
+  sensor -> SetArea(xmin, ymin, Z_AXIS, xmax, ymax, z0);
 
 
   // Drift Visualization
   ViewDrift* vDrift = new ViewDrift();
-  vDrift -> SetArea(-10 * g[1], -10 * H, Z_AXIS, 10 * g[1], 10 * H, z0);
+  vDrift -> SetArea(xmin, ymin, Z_AXIS, xmax, ymax, z0);
 
 
   // Pion Track Setup
@@ -61,12 +91,13 @@ int main(int argc, char * argv[]) {
   track -> SetMomentum(1.E9);        // 1 GeV / c
   track -> EnableElectricField();
   track -> EnablePlotting(vDrift);
+  // track -> EnableDebugging();
 
 
   // Avalanche Setup
   AvalancheMicroscopic* aval = new AvalancheMicroscopic();
   aval -> SetSensor(sensor);
-  aval -> SetCollisionSteps(100);
+  aval -> SetCollisionSteps(200);
   aval -> EnablePlotting(vDrift);
 
 
@@ -123,9 +154,9 @@ int main(int argc, char * argv[]) {
 
 
   // Geometry and Track Visualization
-  TCanvas *cGeo = new TCanvas("geo", "Geometry");
+  TCanvas *c1 = new TCanvas("tr", "Track");
   ViewFEMesh* vFE = new ViewFEMesh();
-  vFE -> SetCanvas(cGeo);
+  vFE -> SetCanvas(c1);
   vFE -> SetComponent(elm);
   vFE -> SetPlane(0, -1, 0, 0, 0, 0);
   vFE -> SetFillMesh(true);
@@ -135,9 +166,50 @@ int main(int argc, char * argv[]) {
   vFE -> EnableAxes();
   vFE -> SetXaxisTitle("x (cm)");
   vFE -> SetYaxisTitle("z (cm)");
-  vFE -> SetArea(-10 * g[1], Z_AXIS, 0., 10 * g[1], z0, 0.);
+  vFE -> SetArea(xmin - delta, Z_AXIS, 0., xmax + delta, z0, 0.);
   vFE -> SetViewDrift(vDrift);
   vFE -> Plot();
-  cGeo -> SaveAs("pion.pdf");
+  c1 -> SaveAs("pion.pdf");
 
+  //app.Run(kTRUE);
+
+
+  // Position Histogram
+  std::ifstream File;
+  std::string line;
+  File.open(f2);
+  std::vector<double> PosX;
+  std::vector<double> PosY;
+  double px, py, pz;
+
+  while (!File.eof()) {
+    File >> line;
+    size_t stop1 = line.find(";");
+    size_t stop2 = line.find(";", stop1 + 1);
+    size_t stop3 = line.find(";", stop2 + 1);
+    px = atof(line.substr(0, stop1).c_str());
+    py = atof(line.substr(stop1 + 1, stop2 - stop1 - 1).c_str());
+    pz = atof(line.substr(stop2 + 1, stop3 - stop2 - 1).c_str());
+    if (pz == Z_AXIS) {
+      PosX.push_back(px);
+      PosY.push_back(py);
+    }
+  }
+
+  float read = 0.005;   // 50 micrometers
+  float nBinsx = (xmax - xmin) / read;
+  float nBinsy = (ymax - ymin) / read;
+  TH2F* hp = new TH2F("hp", "", nBinsx, xmin, xmax, nBinsy, ymin, ymax);
+
+  for (int i = 0; i < PosX.size(); i++) {
+    hp -> Fill(PosX[i], PosY[i]);
+  }
+  TCanvas *c2 = new TCanvas("h", "Position");
+  hp -> Draw("colz");
+  c2 -> SaveAs("hist.pdf");
+
+
+
+
+  std::cout << "TEMPO: " << float(clock() - begin_time) / CLOCKS_PER_SEC << std::endl;
 }
