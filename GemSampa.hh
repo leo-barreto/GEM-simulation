@@ -59,6 +59,7 @@ ComponentElmer* LoadGas(std::string folder, double percent = 70.,
                                           folder + "/mesh.nodes",
                                           folder + "/dielectrics.dat",
                                           folder + "/gem.result", "mm");
+  elm -> SetWeightingField(folder + "/gemWT.result", "WT");
   elm -> EnableMirrorPeriodicityX();
   elm -> EnableMirrorPeriodicityY();
   elm -> PrintRange();
@@ -301,7 +302,6 @@ void EnergyResolution(ComponentElmer* Elm, double info[9], std::string txtfile,
   double dx0 = 2 * RndmUniform() - 1;
   double dy0 = 2 * RndmUniform() - 1;
   double dz0 = -1;
-  int nel = -1;   // Number of Electrons Produced
 
 
   // Sensor
@@ -327,8 +327,10 @@ void EnergyResolution(ComponentElmer* Elm, double info[9], std::string txtfile,
 
 
   for (int i = n_events; i--;) {
-    int nf = 0;
-    track -> TransportPhoton(x0, y0, z0, t0, energy, dx0, dy0, dz0, nel);
+    int nf = 0, nel = 0;
+    while (nel == 0) {
+      track -> TransportPhoton(x0, y0, z0, t0, energy, dx0, dy0, dz0, nel);
+    }
     //std::cout << "Number of Primary Electrons: " << nel << std::endl;
 
     for (int j = 0; j < nel; j++) {
@@ -338,6 +340,8 @@ void EnergyResolution(ComponentElmer* Elm, double info[9], std::string txtfile,
 
       aval -> AvalancheElectron(xe1, ye1, ze1, 0, 0, 0., 0., 0.);
       int np = aval -> GetNumberOfElectronEndpoints();
+
+      std::cout << i << ".Avalanche: " << j << "/" << nel << std::endl;
 
       // Final Positions Analysis
       double xe2, ye2, ze2, te2, e2;

@@ -14,7 +14,7 @@ int main(int argc, char * argv[]) {
   clock_t begin_time = clock();
 
   double g[9];                  // GEM info list
-  std::string GEM = "gem70_140_420";   // GEM folder
+  std::string GEM = "../gem70_140_420";   // GEM folder
   std::string TXTION = "ion.txt";    // Primary Ionization Output
   std::string TXTELE = "ele.txt";    // Readout Output
 
@@ -209,7 +209,5 @@ int main(int argc, char * argv[]) {
   c2 -> SaveAs("hist.pdf");
 
 
-
-
-  std::cout << "TEMPO: " << float(clock() - begin_time) / CLOCKS_PER_SEC << std::endl;
+  std::cout << "Exec Time: " << float(clock() - begin_time) / CLOCKS_PER_SEC << std::endl;
 }
