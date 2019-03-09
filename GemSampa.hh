@@ -26,6 +26,7 @@
 
 using namespace Garfield;
 
+// Old manual setup of detector's properties
 void SetupInfo(double gem[9], double diam, double dist,
                double up, double low, double t_die, double t_pla,
                double i_field, double d_field, double potential) {
@@ -43,6 +44,8 @@ void SetupInfo(double gem[9], double diam, double dist,
   gem[8] = potential;       // GEM Potential
 
 }
+
+
 
 
 
@@ -131,6 +134,7 @@ void Gain(ComponentElmer* Elm, double info[9], std::string txtfile,
   if (sizelimit > 0) {
     aval -> EnableAvalancheSizeLimit(sizelimit);
   }
+  std::cout << "Aval Limit: " << aval -> GetAvalancheSizeLimit() << std::endl;
 
 
   // File
@@ -160,6 +164,9 @@ void Gain(ComponentElmer* Elm, double info[9], std::string txtfile,
 
       if (ze2 <= Z_AXIS + 0.001) {  // Added a delta to minimize border effects
         nf += 1;
+      }
+      if (status == -1) {
+        std::cout << "Electron left the drift area!" << std::endl;
       }
     }
 

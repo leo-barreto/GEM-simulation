@@ -5,9 +5,10 @@ import time
 
 
 # Parameters
-# Options (what to generate)
+# Options (what to generate and where)
 GEN_GEOMETRY = True
 GEN_FIELDS = True
+FOLDER_NAME = ''
 
 # Geometry in mm
 RADIUS = 0.035
@@ -29,10 +30,15 @@ start = time.time()
 
 
 # Geometry Generation
-d_str = str(int(RADIUS * 2000))
-h_str = str(int(DISTANCE_HOLES * 1000))
-v_str = str(int(DELTA_V))
-geo_name = 'gem' + d_str + '_' + h_str + '_' + v_str
+if FOLDER_NAME == '':
+    d_str = str(int(RADIUS * 2000))
+    h_str = str(int(DISTANCE_HOLES * 1000))
+    v_str = str(int(DELTA_V))
+    geo_name = 'gem' + d_str + '_' + h_str + '_' + v_str
+
+else:
+    geo_name = FOLDER_NAME
+
 if GEN_GEOMETRY:
     geo_file = open(geo_name + '.geo', 'w')
 
@@ -318,9 +324,19 @@ End''')
     os.system('ElmerSolver gem.sif')
     print('\nSolving WT Field...')
     os.system('ElmerSolver gemWT.sif')
-    os.chdir('..')
 
 
+# Create a text file for storing the detector information (dimension in cm)
+print('\nWriting Info File...')
+properties = [RADIUS * 0.2, DISTANCE_HOLES / 10, DISTANCE_ELE / 10,
+              DISTANCE_PAD / 10, THICKNESS_DIE / 10, THICKNESS_PLA / 10,
+              E_IND, E_DRI, DELTA_V]
+info = open('info.txt', 'a')
+for i in properties:
+    info.write('%f\n' % i)
+info.close();
+
+os.chdir('..')
 
 time = time.time() - start
 print('\n\nDONE! (in %.2f seconds)' % time)
