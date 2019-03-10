@@ -8,6 +8,7 @@ import time
 # Options (what to generate and where)
 GEN_GEOMETRY = True
 GEN_FIELDS = True
+GEN_ROOT = True
 FOLDER_NAME = ''
 
 # Geometry in mm
@@ -327,16 +328,22 @@ End''')
 
 
 # Create a text file for storing the detector information (dimension in cm)
-print('\nWriting Info File...')
-properties = [RADIUS * 0.2, DISTANCE_HOLES / 10, DISTANCE_ELE / 10,
-              DISTANCE_PAD / 10, THICKNESS_DIE / 10, THICKNESS_PLA / 10,
-              E_IND, E_DRI, DELTA_V]
-info = open('info.txt', 'a')
-for i in properties:
-    info.write('%f\n' % i)
-info.close();
+if GEN_ROOT:
+    print('\nWriting Info File...\n')
+    properties = [RADIUS * 0.2, DISTANCE_HOLES / 10, DISTANCE_ELE / 10,
+                  DISTANCE_PAD / 10, THICKNESS_DIE / 10, THICKNESS_PLA / 10,
+                  E_IND, E_DRI, DELTA_V]
 
-os.chdir('..')
+    ps = '../writeinfo'
+    info = open('info.txt', 'w')
+    for i in properties:
+        ps += ' ' + str(i)
+        info.write('%f\n' % i)
+    info.close();
+
+    os.system('make -C ..')
+    os.system(ps)
+
 
 time = time.time() - start
 print('\n\nDONE! (in %.2f seconds)' % time)
