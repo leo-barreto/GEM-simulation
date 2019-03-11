@@ -1,5 +1,5 @@
  ASCII 3
-!File started at: 2018/10/25 21:09:27
+!File started at: 2019/03/10 18:10:28
  Degrees of freedom: 
 elfield[electric field:3] :    35043   11681   3 : stat elec solver
 potential                :    11681   11681   1 : stat elec solver

@@ -27,7 +27,7 @@
 using namespace Garfield;
 
 // Old manual setup of detector's properties
-void SetupInfo(double gem[9], double diam, double dist,
+void SetupInfoManual(double gem[9], double diam, double dist,
                double up, double low, double t_die, double t_pla,
                double i_field, double d_field, double potential) {
 
@@ -45,6 +45,16 @@ void SetupInfo(double gem[9], double diam, double dist,
 
 }
 
+
+
+std::vector<float>* SetupInfo(std::string folder) {
+  std::vector<float>* g;
+  std::string infoloc = folder + "/info.root";
+  const char* il = infoloc.c_str();
+  TFile* F = new TFile(il);
+  F -> GetObject("info", g);
+  return g;
+}
 
 
 
