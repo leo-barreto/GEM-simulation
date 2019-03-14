@@ -13,7 +13,7 @@ int main(int argc, char * argv[]) {
   std::string GEM = "../gem70_140_420";   // GEM folder
 
   // GEM Setup
-  SetupInfo(g, 70., 140., 0.3, 0.1, 0.005, 0.0005, 4000., 1300., 420.);
+  std::vector<float> g = SetupInfo(GEM);
   ComponentElmer* elm = LoadGas(GEM, 70.);    // 70% Ar, 30% CO2
 
 
