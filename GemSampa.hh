@@ -47,15 +47,61 @@ void SetupInfoManual(double gem[9], double diam, double dist,
 
 
 
-std::vector<float>* SetupInfo(std::string folder) {
-  std::vector<float>* g;
+/*std::vector<float> SetupInfo(std::string folder) {
+
+
+  std::vector<float>* f;
   std::string infoloc = folder + "/info.root";
   const char* il = infoloc.c_str();
   TFile* F = new TFile(il);
-  F -> GetObject("info", g);
+  F -> GetObject("info", f);
+  std::vector<float> g = *f;
+  return g;
+}*/
+
+std::vector<float> SetupInfo(std::string folder) {
+
+
+  std::vector<float> g;
+  std::string infoloc = folder + "/info.txt";
+  std::ifstream File;
+  File.open(infoloc.c_str());
+  std::string line;
+
+  if (File.fail()) {
+    std::cerr << "\nFailed to open info.txt\n" << std::endl;
+    exit(1);
+  }
+
+  while (!File.eof()) {
+    File >> line;
+    g.push_back(stod(line));
+  }
+
+  // Popping last duplicated element
+  g.pop_back();
+
   return g;
 }
 
+
+void WriteSetup(const std::string &name, std::vector<float> g) {
+  const char *f = name.c_str();
+  FILE* file;
+  // Check if the file name doesn't exist
+  if (!(file = fopen(f, "r"))) {
+    file = fopen(f, "w");
+    fprintf(file, "# GEM INFO\n");
+
+    // Write detector info
+    for (const float &p : g) {
+      fprintf(file, "%f\n", p);
+    }
+
+    fprintf(file, "#########\n");
+    fclose(file);
+  }
+}
 
 
 
@@ -98,7 +144,6 @@ ComponentElmer* LoadGas(std::string folder, double percent = 70.,
    gas -> DisablePenningTransfer();
   }
 
-  //elm -> SetMedium(0, gas);
   int nMaterials = elm -> GetNumberOfMaterials();
   for (int i = 0; i < nMaterials; ++i) {
     double eps = elm -> GetPermittivity(i);
