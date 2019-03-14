@@ -91,12 +91,16 @@ void WriteSetup(const std::string &name, std::vector<float> g) {
   // Check if the file name doesn't exist
   if (!(file = fopen(f, "r"))) {
     file = fopen(f, "w");
-    fprintf(file, "# GEM INFO\n");
 
     // Write detector info
+    fprintf(file, "# GEM INFO\n");
     for (const float &p : g) {
       fprintf(file, "%f\n", p);
     }
+
+    // Write gas info
+
+
 
     fprintf(file, "#########\n");
     fclose(file);
@@ -159,27 +163,21 @@ ComponentElmer* LoadGas(std::string folder, double percent = 70.,
 
 
 
-void Gain(ComponentElmer* Elm, double info[9], std::string txtfile,
+void Gain(ComponentElmer* Elm, std::vector<float> g, std::string txtfile,
           int sizelimit = 10, int n_events = 100) {
 
 
-  // GEM Dimensions in cm
-  const double T_DIE = info[4];
-  const double T_PLA = info[5];
-  const double DIST = info[1];
-  const double H = sqrt(3) * DIST / 2;
-  const double D_E = info[2];
-  const double D_P = info[3];
-
-  const double Center = (D_E - D_P) / 2;
-  const double Z_AXIS = -1 * (D_P + T_DIE / 2 + T_PLA) - Center;
-  const double electron_pos = T_DIE / 2 + T_PLA + (0.1 + 0.7 * RndmUniform()) * D_E - Center;
+  // GEM Dimensions
+  const double H = sqrt(3) * g[1] / 2;
+  const double CENTER = (g[2] - g[3]) / 2;
+  const double Z_MIN = -1 * (g[3] + g[4] / 2 + g[5]) - CENTER;
+  const double Z_MAX = g[2] + g[4] / 2 + g[5] - CENTER;
 
 
   // Sensor
   Sensor* sensor = new Sensor();
   sensor -> AddComponent(Elm);
-  sensor -> SetArea(-5 * DIST, -5 * H, Z_AXIS, 5 * DIST, 5 * H, electron_pos + 0.01);
+  sensor -> SetArea(-5 * g[1], -5 * H, Z_MIN, 5 * g[1], 5 * H, Z_MAX);
 
 
   // Avalanche and Drift Setup
@@ -188,13 +186,14 @@ void Gain(ComponentElmer* Elm, double info[9], std::string txtfile,
   aval -> SetCollisionSteps(100);
   if (sizelimit > 0) {
     aval -> EnableAvalancheSizeLimit(sizelimit);
+    std::cout << "Aval Limit: " << aval -> GetAvalancheSizeLimit() << std::endl;
   }
-  std::cout << "Aval Limit: " << aval -> GetAvalancheSizeLimit() << std::endl;
 
 
   // File
   FILE* file;
   const char* f_title = txtfile.c_str();
+  WriteSetup(txtfile, g);
 
 
   // Avalanches Calculations
@@ -202,9 +201,10 @@ void Gain(ComponentElmer* Elm, double info[9], std::string txtfile,
     clock_t begin_time = clock();
 
     // Random Initial Positions
-    double x0 = (2 * RndmUniform() - 1) * DIST / 2;
-    double y0 = (2 * RndmUniform() - 1) * DIST / 2;
-    aval -> AvalancheElectron(x0, y0, electron_pos, 0, 0, 0., 0., 0.);
+    double z0 = g[4] / 2 + g[5] + RndmUniform() * g[2] - CENTER;
+    double x0 = (2 * RndmUniform() - 1) * g[1] / 2;
+    double y0 = (2 * RndmUniform() - 1) * g[1] / 2;
+    aval -> AvalancheElectron(x0, y0, z0, 0, 0, 0., 0., 0.);
     int np = aval -> GetNumberOfElectronEndpoints();
     int ne = 0, ni = 0, nf = 0;
     aval -> GetAvalancheSize(ne, ni);
@@ -217,7 +217,7 @@ void Gain(ComponentElmer* Elm, double info[9], std::string txtfile,
       aval -> GetElectronEndpoint(j, xe1, ye1, ze1, te1, e1,
                                   xe2, ye2, ze2, te2, e2, status);
 
-      if (ze2 <= Z_AXIS + 0.001) {  // Added a delta to minimize border effects
+      if (ze2 <= Z_MIN + 0.001) {  // Added a delta to minimize border effects
         nf += 1;
       }
       if (status == -1) {
@@ -234,6 +234,8 @@ void Gain(ComponentElmer* Elm, double info[9], std::string txtfile,
     if (np == 1) {
       i += 1;         // No multiplication doesn't add to counter
     }
+
+    std::cout << i << "/" << n_events << std::endl;
 
   }
 }
