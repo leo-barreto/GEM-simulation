@@ -13,7 +13,6 @@ int main(int argc, char * argv[]) {
   //TApplication app("app", &argc, argv);
   clock_t begin_time = clock();
 
-  double g[9];                  // GEM info list
   std::string GEM = "../gem70_140_420";   // GEM folder
   std::string TXTION = "ion.txt";    // Primary Ionization Output
   std::string TXTELE = "ele.txt";    // Readout Output

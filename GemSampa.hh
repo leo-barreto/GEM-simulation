@@ -341,43 +341,37 @@ void LaunchParticle(ComponentElmer* Elm, double info[9], std::string txtfile,
 
 
 
-void EnergyResolution(ComponentElmer* Elm, double info[9], std::string txtfile,
-                      double energy, int n_events = 1) {
+void EnergyResolution(ComponentElmer* Elm, std::vector<float> g,
+                      std::string txtfile, double energy, int n_events = 1) {
   // Launching a photon, non-parallel calculation
 
 
-  // GEM Dimensions in cm
-  const double T_DIE = info[4];
-  const double T_PLA = info[5];
-  const double DIST = info[1];
-  const double H = sqrt(3) * DIST / 2;
-  const double D_E = info[2];
-  const double D_P = info[3];
-
-  const double Center = (D_E - D_P) / 2;
-  const double Z_AXIS = -1 * (D_P + T_DIE / 2 + T_PLA) - Center;
-
-
   // Initial Parameters for Track
-  double x0 = (2 * RndmUniform() - 1) * DIST / 2;
-  double y0 = (2 * RndmUniform() - 1) * H / 2;
-  double z0 = T_DIE / 2 + T_PLA + D_E - 0.01 - Center;
-  double t0 = 0.;
-  double dx0 = 2 * RndmUniform() - 1;
-  double dy0 = 2 * RndmUniform() - 1;
-  double dz0 = -1;
+  const double Center = (g[2] - g[3]) / 2;
+  const double Z_AXIS = -1 * (g[3] + g[4] / 2 + g[5]) - Center;
+  const double H = sqrt(3) * g[1] / 2;
+
+  // Position
+  const double x0 = 0.;
+  const double y0 = 0.;
+  const double z0 = g[4] / 2 + g[5] + g[2] - 0.001 - Center;
+  const double t0 = 0.;
+
+  // Velocity vector (direction only)
+  const double dx0 = 0;
+  const double dy0 = 0;
+  const double dz0 = -1;
 
 
   // Sensor
   Sensor* sensor = new Sensor();
   sensor -> AddComponent(Elm);
-  sensor -> SetArea(-10 * DIST, -10 * H, Z_AXIS, 10 * DIST, 10 * H, z0);
+  sensor -> SetArea(-10 * g[1], -10 * H, Z_AXIS, 10 * g[1], 10 * H, z0);
 
 
   // Avalanche and Drift Setup
   AvalancheMicroscopic* aval = new AvalancheMicroscopic();
   aval -> SetSensor(sensor);
-  aval -> SetCollisionSteps(100);
 
 
   // Setup Track
@@ -388,6 +382,7 @@ void EnergyResolution(ComponentElmer* Elm, double info[9], std::string txtfile,
   // File
   FILE* file;
   const char* f_title = txtfile.c_str();
+  WriteSetup(txtfile, g);
 
 
   for (int i = n_events; i--;) {
@@ -418,6 +413,11 @@ void EnergyResolution(ComponentElmer* Elm, double info[9], std::string txtfile,
         if (ze3 <= Z_AXIS + 0.001) {  // Added a delta to minimize border effects
           nf += 1;
         }
+
+        if (status == -1) {
+          std::cout << "Electron left the drift area!" << std::endl;
+        }
+
       }
     }
 
