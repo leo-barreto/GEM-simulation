@@ -75,7 +75,7 @@ std::vector<float> SetupInfo(std::string folder) {
 
   while (!File.eof()) {
     File >> line;
-    g.push_back(stod(line));
+    g.push_back(atof(line.c_str()));
   }
 
   // Popping last duplicated element
@@ -94,8 +94,12 @@ void WriteSetup(const std::string &name, std::vector<float> g) {
 
     // Write detector info
     fprintf(file, "# GEM INFO\n");
-    for (const float &p : g) {
+    /*for (const float &p : g) {
       fprintf(file, "%f\n", p);
+    }*/
+
+    for (std::size_t i = 0; i < g.size(); i++){
+        fprintf(file, "%f\n", g[i]);
     }
 
     // Write gas info
