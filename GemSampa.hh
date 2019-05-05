@@ -99,7 +99,7 @@ void WriteSetup(const std::string &name, std::vector<float> g) {
     }*/
 
     for (std::size_t i = 0; i < g.size(); i++){
-        fprintf(file, "%f\n", g[i]);
+        fprintf(file, "# %f\n", g[i]);
     }
 
     // Write gas info

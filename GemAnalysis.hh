@@ -116,7 +116,7 @@ void ReadTXTGain(std::string txtfolder) {
 }
 
 
-void ReadTXTEnergyResolution(std::string txtfolder) {
+void ReadTXTEnergyResolution(std::string txtfolder, bool draw = 0) {
 
   std::string folder = "./" + txtfolder;
   DIR* dir = opendir(folder.c_str());
@@ -149,20 +149,25 @@ void ReadTXTEnergyResolution(std::string txtfolder) {
     }
 
     while (!File.eof()) {
-      File >> line;
-      ne = stod(line);
-      if (ne > 200) {
-        NElectrons.push_back(ne);
+      getline(File, line);
+
+
+      if (line[0] != '#' && line.length() != 0) { // Ignore info
+        ne = stod(line);
+        if (ne > 300) {
+          NElectrons.push_back(ne);
+        }
+        //NElectrons.push_back(ne);
       }
     }
 
     // Popping last duplicated elements
-    NElectrons.pop_back();
+    //NElectrons.pop_back();
 
     // Histograms
-    int nBins = 50;
+    int nBins = 100;
     float hmin = 0.;
-    float hmaxN = *max_element(NElectrons.begin(), NElectrons.end());
+    float hmaxN = *max_element(NElectrons.begin(), NElectrons.end()) + 100;
     std::string name_r = "hNElectrons_" + txts[i].substr(0, txts[i].size() - 4);
 
     TH1I* hNElectrons = new TH1I(name_r.c_str(), "", nBins, hmin, hmaxN);
@@ -175,21 +180,26 @@ void ReadTXTEnergyResolution(std::string txtfolder) {
     hNElectrons -> Write();
     std::cout << "Saved histograms for " << txts[i] << std::endl;
 
-    double m1, m2, m3, s1, s2;
 
-    int bin1 = hNElectrons -> FindFirstBinAbove(hNElectrons -> GetMaximum()/2);
-    int bin2 = hNElectrons -> FindLastBinAbove(hNElectrons -> GetMaximum()/2);
-    m2 = hNElectrons -> GetBinCenter(bin2) - hNElectrons -> GetBinCenter(bin1);
+    // Analysis
+    hNElectrons -> Fit("gaus", "R", "", hmaxN / 2, hmaxN);
 
-    m1 = hNElectrons -> GetMean();
-    s1 = hNElectrons -> GetStdDev() / sqrt(hNElectrons -> GetEntries());
-    m3 = m2 / m1;
-    s2 = s1 * m2/ (m1 * m1);
+    if (draw == 1){
+      TCanvas* c1 = new TCanvas("", "canvas");
+      hNElectrons -> Draw();
+      std::string image = name_r + ".pdf";
+      c1 -> SaveAs(image.c_str());
+    }
+    double mean = hNElectrons -> GetFunction("gaus") -> GetParameter(1);
+    double errmean = hNElectrons -> GetFunction("gaus") -> GetParError(1);
+    double FWMH = 2.35 * hNElectrons -> GetFunction("gaus") -> GetParameter(2);
+    double errFWMH = hNElectrons -> GetFunction("gaus") -> GetParError(2);
 
-    std::cout << "Mean: " << m1 << "(" << s1 << ")" << std::endl;
-    std::cout << "FWHM: " << m2 << std::endl;
-    std::cout << "Relative Energy Resolution: " << m3 << "(" << s2 << ")" << std::endl;
-    std::cout << "Number of Entries: " << hNElectrons -> GetEntries() << std::endl;
+    double er = FWMH / mean;
+    double errer = sqrt(pow(errFWMH / mean, 2) + pow(errmean * FWMH / pow(mean, 2), 2));
+    //std::cout << 2.35 * fit -> GetParameter(2) / fit -> GetParameter(1) << std::endl;
+    std::cout << er << std::endl;
+    std::cout << errer << std::endl;
 
   }
 

@@ -9,7 +9,7 @@ import time
 GEN_GEOMETRY = True
 GEN_FIELDS = True
 GEN_ROOT = True
-FOLDER_NAME = ''
+FOLDER_NAME = '2mm_420'
 
 # Geometry in mm
 RADIUS = 0.035
@@ -18,12 +18,12 @@ DISTANCE_HOLES = 0.140
 THICKNESS_DIE = 0.05
 THICKNESS_PLA = 0.005
 DISTANCE_PAD = 1.
-DISTANCE_ELE = 3.
+DISTANCE_ELE = 2.
 
 # Electric Field in V/cm; Potential in V.
 E_DRI = 1300
 E_IND = 4000
-DELTA_V = 500
+DELTA_V = 420
 PERMITTIVITY_DIE = 3.23 # relative
 
 
