@@ -113,6 +113,18 @@ void WriteSetup(const std::string &name, std::vector<float> g) {
 }
 
 
+void GEMRange(double range[4], std::vector<float> g, double delta = 0.001) {
+  // Get necessary ranges [xmax, ymax, zmax, Vmin] for calculations. Noting that
+  // the GEM cell is symmetric (xmin = -xmax) and Vmax = 0 V.
+  // For zmax, a small delta is subtracted due to imperfections on border.
+
+  range[0] = g[1] / 4;
+  range[1] = sqrt(3) * g[1] / 4;
+  range[2] = (g[2] + g[3] + g[4]) / 2 + g[5] - delta;
+  range[3] = -1 * (g[6] * g[3] + g[8] + g[7] * g[2]);
+}
+
+
 
 ComponentElmer* LoadGas(std::string folder, double percent = 70.,
                         double ppm = 0., double penning = 0.57,
@@ -611,33 +623,38 @@ void LaunchPhoton(ComponentElmer* Elm, double info[9], std::string txtfile,
 }
 
 
-void Resolutions(ComponentElmer* Elm, std::vector<float> g, std::string txtfile,
-                 double energy, int n_events = 1,
-                 const char* particle = "photon") {
+
+void PhotonRes(ComponentElmer* Elm, std::vector<float> g, std::string txtfile,
+                 double energy, int n_events = 1) {
   // Launches the particle (photon or not) on a GEM to get gain, primary
   // ionizations, energy and position resolution
 
-  // Initial Parameters for Track
-  const double Center = (g[2] - g[3]) / 2;
-  const double Z_AXIS = -1 * (g[3] + g[4] / 2 + g[5]) - Center;
-  const double H = sqrt(3) * g[1] / 2;
 
-  // Position
-  const double x0 = 0.;
-  const double y0 = 0.;
-  const double z0 = g[4] / 2 + g[5] + g[2] - 0.001 - Center;
-  const double t0 = 0.;
+  // Files for gain, energy res., position res., primary ionizations
+  FILE* file;
+  std::string T[4] = {"g_", "er_", "pr_", "i_"};
+  for (int i = 4; i--;) {
+    T[i] += txtfile;
+    WriteSetup(T[i], g);
+  }
+  const char* fg = T[0].c_str();
+  const char* fer = T[1].c_str();
+  const char* fpr = T[2].c_str();
+  const char* fi = T[3].c_str();
 
-  // Velocity vector (direction only)
-  const double dx0 = 0;
-  const double dy0 = 0;
-  const double dz0 = -1;
+
+
+  // Particle position and velocity versor
+  double zmax = (g[2] + g[3] + g[4]) / 2 + g[5], delta = 0.001;
+  const double x0 = 0., y0 = 0., z0 = zmax - delta, t0 = 0.;
+  const double dx0 = 0., dy0 = 0., dz0 = -1;
 
 
   // Sensor
   Sensor* sensor = new Sensor();
   sensor -> AddComponent(Elm);
-  sensor -> SetArea(-10 * g[1], -10 * H, Z_AXIS, 10 * g[1], 10 * H, z0);
+  sensor -> SetArea(-10 * g[1], -10 * g[1], -zmax,
+                     10 * g[1], 10 * g[1], zmax);
 
 
   // Avalanche and Drift Setup
@@ -650,27 +667,69 @@ void Resolutions(ComponentElmer* Elm, std::vector<float> g, std::string txtfile,
   track -> SetSensor(sensor);
 
 
+  for (int i = n_events; i--;) {
+
+    // Number of primary electrons, total and effective
+    int nsum = 0, npsum = 0, nf = 0;
+    while (nsum == 0) {
+      track -> TransportPhoton(x0, y0, z0, t0, energy, dx0, dy0, dz0, nsum);
+    }
+
+    for (int j = nsum; j--;) {
+      // Properties of electron (pos, time, energy, velocity vector)
+      double xe1, ye1, ze1, te1, e1, dxe, dye, dze;
+      track -> GetElectron(j, xe1, ye1, ze1, te1, e1, dxe, dye, dze);
+
+      aval -> AvalancheElectron(xe1, ye1, ze1, te1, e1, dxe, dye, dze);
+      int np = aval -> GetNumberOfElectronEndpoints();
+      npsum += np;
+
+      std::cout << i << ".Avalanche: " << j << std::endl;
+
+      // Final Positions Analysis
+      double xe2, ye2, ze2, te2, e2;
+      double xe3, ye3, ze3, te3, e3;
+      int status;
+      for (int k = np; k--;) {
+        aval -> GetElectronEndpoint(k, xe2, ye2, ze2, te2, e2,
+                                    xe3, ye3, ze3, te3, e3, status);
+
+        if (ze3 <= -zmax + delta) {
+          nf++;
+
+          // Position Resolution
+          file = fopen(fpr, "a");
+          fprintf(file, "%d;%f;%f;\n", i, xe3, ye3);
+          fclose(file);
+        }
+
+        if (status == -1) {
+          std::cout << "Electron left the drift area!" << std::endl;
+        }
+
+      }
+    }
 
 
+    // Saving on txt
+    // Gain
+    file = fopen(fg, "a");
+    fprintf(file, "%f;%f;0\n", (float)(npsum) / nsum, (float)(nf) / nsum);
+    fclose(file);
 
+    // Energy Resolution
+    file = fopen(fer, "a");
+    fprintf(file, "%d\n", nf);
+    fclose(file);
 
-
-
+    // Primary Ionizations
+    file = fopen(fi, "a");
+    fprintf(file, "%d;0\n", nsum);
+    fclose(file);
+  }
 
 }
 
 
-
-void GEMRange(double range[4], std::vector<float> g, double delta = 0.001) {
-  // Get necessary ranges [xmax, ymax, zmax, Vmin] for calculations. Noting that
-  // the GEM cell is symmetric (xmin = -xmax) and Vmax = 0 V.
-  // For zmax, a small delta is subtracted due to imperfections on border.
-  range[0] = g[1] / 4;
-  range[1] = sqrt(3) * g[1] / 4;
-  range[2] = (g[2] + g[3] + g[4]) / 2 + g[5] - delta;
-  range[3] = -1 * (g[6] * g[3] + g[8] + g[7] * g[2]);
-
-
-}
 
 #endif
