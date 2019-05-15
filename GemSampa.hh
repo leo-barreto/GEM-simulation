@@ -85,6 +85,7 @@ std::vector<float> SetupInfo(std::string folder) {
 }
 
 
+
 void WriteSetup(const std::string &name, std::vector<float> g) {
   const char *f = name.c_str();
   FILE* file;
@@ -607,6 +608,69 @@ void LaunchPhoton(ComponentElmer* Elm, double info[9], std::string txtfile,
       }
     }
   }
+}
+
+
+void Resolutions(ComponentElmer* Elm, std::vector<float> g, std::string txtfile,
+                 double energy, int n_events = 1,
+                 const char* particle = "photon") {
+  // Launches the particle (photon or not) on a GEM to get gain, primary
+  // ionizations, energy and position resolution
+
+  // Initial Parameters for Track
+  const double Center = (g[2] - g[3]) / 2;
+  const double Z_AXIS = -1 * (g[3] + g[4] / 2 + g[5]) - Center;
+  const double H = sqrt(3) * g[1] / 2;
+
+  // Position
+  const double x0 = 0.;
+  const double y0 = 0.;
+  const double z0 = g[4] / 2 + g[5] + g[2] - 0.001 - Center;
+  const double t0 = 0.;
+
+  // Velocity vector (direction only)
+  const double dx0 = 0;
+  const double dy0 = 0;
+  const double dz0 = -1;
+
+
+  // Sensor
+  Sensor* sensor = new Sensor();
+  sensor -> AddComponent(Elm);
+  sensor -> SetArea(-10 * g[1], -10 * H, Z_AXIS, 10 * g[1], 10 * H, z0);
+
+
+  // Avalanche and Drift Setup
+  AvalancheMicroscopic* aval = new AvalancheMicroscopic();
+  aval -> SetSensor(sensor);
+
+
+  // Setup Track
+  TrackHeed* track = new TrackHeed();
+  track -> SetSensor(sensor);
+
+
+
+
+
+
+
+
+
+}
+
+
+
+void GEMRange(double range[4], std::vector<float> g, double delta = 0.001) {
+  // Get necessary ranges [xmax, ymax, zmax, Vmin] for calculations. Noting that
+  // the GEM cell is symmetric (xmin = -xmax) and Vmax = 0 V.
+  // For zmax, a small delta is subtracted due to imperfections on border.
+  range[0] = g[1] / 4;
+  range[1] = sqrt(3) * g[1] / 4;
+  range[2] = (g[2] + g[3] + g[4]) / 2 + g[5] - delta;
+  range[3] = -1 * (g[6] * g[3] + g[8] + g[7] * g[2]);
+
+
 }
 
 #endif
