@@ -116,7 +116,7 @@ void WriteSetup(const std::string &name, std::vector<float> g) {
 void GEMRange(double range[4], std::vector<float> g, double delta = 0.001) {
   // Get necessary ranges [xmax, ymax, zmax, Vmin] for calculations. Noting that
   // the GEM cell is symmetric (xmin = -xmax) and Vmax = 0 V.
-  // For zmax, a small delta is subtracted due to imperfections on border.
+  // For zmax, a small delta is subtracted due to border imperfections.
 
   range[0] = g[1] / 4;
   range[1] = sqrt(3) * g[1] / 4;
@@ -645,16 +645,16 @@ void PhotonRes(ComponentElmer* Elm, std::vector<float> g, std::string txtfile,
 
 
   // Particle position and velocity versor
-  double zmax = (g[2] + g[3] + g[4]) / 2 + g[5], delta = 0.001;
-  const double x0 = 0., y0 = 0., z0 = zmax - delta, t0 = 0.;
-  const double dx0 = 0., dy0 = 0., dz0 = -1;
+  double delta = 0.001;
+  double R[4]; GEMRange(R, g, delta);
+  const double z0 = R[2], t0 = 0., dx0 = 0., dy0 = 0., dz0 = -1;
 
 
   // Sensor
   Sensor* sensor = new Sensor();
   sensor -> AddComponent(Elm);
-  sensor -> SetArea(-10 * g[1], -10 * g[1], -zmax,
-                     10 * g[1], 10 * g[1], zmax);
+  sensor -> SetArea(-40 * R[0], -40 * R[1], -R[2] - delta,
+                     40 * R[0], 40 * R[1], R[2] + delta);
 
 
   // Avalanche and Drift Setup
@@ -668,38 +668,48 @@ void PhotonRes(ComponentElmer* Elm, std::vector<float> g, std::string txtfile,
 
 
   for (int i = n_events; i--;) {
+    // Create code for each event
+    int code = RndmUniform();
+
+    // Randomize initial x and y positions
+    double x0 = (2 * RndmUniform() - 1) * R[0];
+    double y0 = (2 * RndmUniform() - 1) * R[1];
+
 
     // Number of primary electrons, total and effective
-    int nsum = 0, npsum = 0, nf = 0;
+    int nsum = 0, nt = 0, nf = 0;
     while (nsum == 0) {
       track -> TransportPhoton(x0, y0, z0, t0, energy, dx0, dy0, dz0, nsum);
     }
 
     for (int j = nsum; j--;) {
+      clock_t begin_time = clock();
+
       // Properties of electron (pos, time, energy, velocity vector)
       double xe1, ye1, ze1, te1, e1, dxe, dye, dze;
       track -> GetElectron(j, xe1, ye1, ze1, te1, e1, dxe, dye, dze);
 
       aval -> AvalancheElectron(xe1, ye1, ze1, te1, e1, dxe, dye, dze);
       int np = aval -> GetNumberOfElectronEndpoints();
-      npsum += np;
+      nt += np;
 
       std::cout << i << ".Avalanche: " << j << std::endl;
 
       // Final Positions Analysis
       double xe2, ye2, ze2, te2, e2;
       double xe3, ye3, ze3, te3, e3;
-      int status;
+      int status, nf_aval = 0;
       for (int k = np; k--;) {
         aval -> GetElectronEndpoint(k, xe2, ye2, ze2, te2, e2,
                                     xe3, ye3, ze3, te3, e3, status);
 
-        if (ze3 <= -zmax + delta) {
+        if (ze3 <= -R[2]) {
           nf++;
+          nf_aval++;
 
-          // Position Resolution
+          // Saving Position Resolution
           file = fopen(fpr, "a");
-          fprintf(file, "%d;%f;%f;\n", i, xe3, ye3);
+          fprintf(file, "%d_%f;%f;%f\n", i, code, xe3, ye3);
           fclose(file);
         }
 
@@ -708,15 +718,17 @@ void PhotonRes(ComponentElmer* Elm, std::vector<float> g, std::string txtfile,
         }
 
       }
+
+      // Saving Gain for each avalanche
+      float min = float(clock() - begin_time) / (CLOCKS_PER_SEC * 60);
+      file = fopen(fg, "a");
+      fprintf(file, "%d;%d;%.2f\n", np, nf_aval, min);
+      fclose(file);
+
     }
 
 
     // Saving on txt
-    // Gain
-    file = fopen(fg, "a");
-    fprintf(file, "%f;%f;0\n", (float)(npsum) / nsum, (float)(nf) / nsum);
-    fclose(file);
-
     // Energy Resolution
     file = fopen(fer, "a");
     fprintf(file, "%d\n", nf);
@@ -729,6 +741,7 @@ void PhotonRes(ComponentElmer* Elm, std::vector<float> g, std::string txtfile,
   }
 
 }
+
 
 
 
