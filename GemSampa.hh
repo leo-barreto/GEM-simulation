@@ -744,5 +744,22 @@ void PhotonRes(ComponentElmer* Elm, std::vector<float> g, std::string txtfile,
 
 
 
+double Fe55() {
+  // X-ray energy calculation (5.89 keV 30%, 5.9 keV 58%, 6.49 keV 12%)
+  // Ref. http://www.nucleide.org/DDEP_WG/Nuclides/Fe-55_tables.pdf
+
+  double energy;
+  double prob = RndmUniform();
+  if (prob >= 0.42) {
+    energy = 5900.;
+  } else if (prob >= 0.12) {
+    energy = 5890.;
+  } else {
+    energy = 6490.;
+  }
+
+  return energy;
+}
+
 
 #endif
