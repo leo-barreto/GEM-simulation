@@ -9,7 +9,7 @@ import time
 GEN_GEOMETRY = True
 GEN_FIELDS = True
 GEN_ROOT = True
-FOLDER_NAME = 'drift_3000'
+FOLDER_NAME = ''
 
 # Geometry in mm
 RADIUS = 0.035
@@ -23,7 +23,7 @@ DISTANCE_ELE = 3.
 # Electric Field in V/cm; Potential in V.
 E_DRI = 3000
 E_IND = 4000
-DELTA_V = 470
+DELTA_V = 420
 PERMITTIVITY_DIE = 3.23 # relative
 
 
@@ -303,7 +303,7 @@ End
 Boundary Condition 6
   Target Boundaries = 3
   Periodic BC = 5
-  Periodic BC Rotate(3) = Real 0 180 0
+  Periodic BC Rotate(3) = Real 0 0 180
 End
 
 
@@ -315,7 +315,7 @@ End
 Boundary Condition 8
   Target Boundaries = 4
   Periodic BC = 7
-  Periodic BC Rotate(3) = Real 180 0 0
+  Periodic BC Rotate(3) = Real 0 0 180
 End''')
 
     WTsif.close()
