@@ -113,15 +113,17 @@ void WriteSetup(const std::string &name, std::vector<float> g) {
 }
 
 
-void GEMRange(double range[4], std::vector<float> g, double delta = 0.001) {
+double* GEMRange(std::vector<float> g, double delta = 0.001) {
   // Get necessary ranges [xmax, ymax, zmax, Vmin] for calculations. Noting that
   // the GEM cell is symmetric (xmin = -xmax) and Vmax = 0 V.
   // For zmax, a small delta is subtracted due to border imperfections.
 
+  double range[4];
   range[0] = g[1] / 4;
   range[1] = sqrt(3) * g[1] / 4;
   range[2] = (g[2] + g[3] + g[4]) / 2 + g[5] - delta;
   range[3] = -1 * (g[6] * g[3] + g[8] + g[7] * g[2]);
+  return range;
 }
 
 
@@ -646,7 +648,7 @@ void PhotonRes(ComponentElmer* Elm, std::vector<float> g, std::string txtfile,
 
   // Particle position and velocity versor
   double delta = 0.001;
-  double R[4]; GEMRange(R, g, delta);
+  double* R = GEMRange(g, delta);
   const double z0 = R[2], t0 = 0., dx0 = 0., dy0 = 0., dz0 = -1;
 
 

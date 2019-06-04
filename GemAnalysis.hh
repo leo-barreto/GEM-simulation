@@ -27,6 +27,7 @@
 #include "Plotting.hh"
 #include "ViewFEMesh.hh"
 
+#include "GemSampa.hh"
 
 
 using namespace Garfield;
@@ -307,37 +308,32 @@ void ReadTXTPositionResolution(std::string txtfolder, int nBins) {
 }
 
 
-void PlotElectricField(ComponentElmer* Elm, double info[9]) {
+void PlotElectricField(std::string folder) {
 
-  // GEM Dimensions in cm
-  const double T_DIE = info[4];
-  const double T_PLA = info[5];
-  const double DIST = info[1];
-  const double H = sqrt(3) * DIST / 2;
-  const double D_E = info[2];
-  const double D_P = info[3];
+    std::vector<float> g = SetupInfo(folder);
+    double* range = Range(g, 0.);
+    ComponentElmer* Elm = LoadGas(folder);
 
-  // Electric Properties in V and V/cm
-  const double EIND = info[6];
-  const double EDRI = info[7];
-  const double VGEM = info[8];
+    // GEM constants
+    double Vup = -1.1 * (g[6] * g[3] + g[8]);
+    double Vlow = -0.9 * (g[6] * g[3]);
+    double Center = (g[2] - g[3]) / 2;
+    double Shift = g[1] / 4;
+    double H = sqrt(3) * g[1] / 2;
 
-  double Vup = -1.1 * (EIND * D_P + VGEM);
-  double Vlow = -0.9 * (EIND * D_P);
-  double Center = (D_E - D_P) / 2;
-  double Shift = DIST / 4;
+    // Visualization of Fields
+    TCanvas* cFie = new TCanvas("fie", "Field");
+    ViewField* vF = new ViewField();
 
-  // Visualization of Fields
-  TCanvas* cFie = new TCanvas("fie", "Field");
-  ViewField* vF = new ViewField();
+    vF -> SetCanvas(cFie);
+    vF -> SetComponent(Elm);
+    vF -> SetPlane(0, -1, 0, 0, H / 2, 0);
+    vF -> SetArea(-1.5 * g[1] + Shift, -3 * g[4] - Center, 1.5 * g[1] + Shift, 3 * g[4] - Center);
+    vF -> SetVoltageRange(Vup, Vlow);
+    vF -> PlotContour();
 
-  vF -> SetCanvas(cFie);
-  vF -> SetComponent(Elm);
-  vF -> SetPlane(0, -1, 0, 0, H / 2, 0);
-  vF -> SetArea(-1.5 * DIST + Shift, -3 * T_DIE - Center, 1.5 * DIST + Shift, 3 * T_DIE - Center);
-  vF -> SetVoltageRange(Vup, Vlow);
-  vF -> PlotContour();
-
+    std::string image = folder + "_field.pdf";
+    cFie -> SaveAs(image.c_str());
 }
 
 
