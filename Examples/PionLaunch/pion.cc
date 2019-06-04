@@ -22,23 +22,27 @@ int main(int argc, char * argv[]) {
   FILE* fele;     // Readout Output
   const char* f1 = TXTION.c_str();
   const char* f2 = TXTELE.c_str();
-  fion = fopen(f1, "a");
-  fele = fopen(f2, "a");
+  fion = fopen(f1, "w");
+  fele = fopen(f2, "w");
 
 
   // GEM Setup
   std::vector<float> g = SetupInfo(GEM);
+  double delta = 0.001;
+  double* R = GEMRange(g, delta);
   ComponentElmer* elm = LoadGas(GEM, 70.);    // 70% Ar, 30% CO2
 
 
   // Initial Parameters for Track
   const double Center = (g[2] - g[3]) / 2;
-  const double Z_AXIS = -1 * (g[3] + g[4] / 2 + g[5]) - Center;
   const double H = sqrt(3) * g[1] / 2;
+
   // Position
   const double x0 = (2 * RndmUniform() - 1) * g[1] / 2;
   const double y0 = (2 * RndmUniform() - 1) * H / 2;
-  const double z0 = g[4] / 2 + g[5] + g[2] - 0.001 - Center;
+  const double z0 = R[2];
+
+
   // Time
   const double t0 = 0.;
   // Velocity vector (direction only)
@@ -47,56 +51,30 @@ int main(int argc, char * argv[]) {
   const double dz0 = -1;
 
 
-  // Given the velocity vector and approximating the particle trajectory as a
-  // line, we can reduce the volume in which tracks are calculated
-  // (sensor area) for efficiency
-  double delta = 3 * g[1];
-  double tgx = fabs(dx0 / dz0);
-  double tgy = fabs(dy0 / dz0);
-  double xmax, xmin, ymax, ymin;
-  if (dx0 >= 0.) {
-    xmax = z0 * tgx + delta;
-    xmin = -delta;
-  }
-  else {
-    xmax = delta;
-    xmin = -z0 * tgx - delta;
-  }
-  if (dy0 >= 0.) {
-    ymax = z0 * tgy + delta;
-    ymin = -delta;
-  }
-  else {
-    ymax = delta;
-    ymin = -z0 * tgy - delta;
-  }
-
-
   // Sensor
   Sensor* sensor = new Sensor();
   sensor -> AddComponent(elm);
-  sensor -> SetArea(xmin, ymin, Z_AXIS, xmax, ymax, z0);
+  sensor -> SetArea(-10, -10, -R[2] - delta, 10, 10, R[2] + delta);
 
 
   // Drift Visualization
   ViewDrift* vDrift = new ViewDrift();
-  vDrift -> SetArea(xmin, ymin, Z_AXIS, xmax, ymax, z0);
+  vDrift -> SetArea(-10, -10, -R[2] - delta, 10, 10, R[2] + delta);
 
 
   // Pion Track Setup
   TrackHeed* track = new TrackHeed();
   track -> SetSensor(sensor);
-  track -> SetParticle("pi");       // pion-
+  track -> SetParticle("pi");        // pion-
   track -> SetMomentum(1.E9);        // 1 GeV / c
   track -> EnableElectricField();
   track -> EnablePlotting(vDrift);
-  // track -> EnableDebugging();
 
 
   // Avalanche Setup
   AvalancheMicroscopic* aval = new AvalancheMicroscopic();
   aval -> SetSensor(sensor);
-  aval -> SetCollisionSteps(200);
+  aval -> SetCollisionSteps(1000);
   aval -> EnablePlotting(vDrift);
 
 
@@ -138,7 +116,7 @@ int main(int argc, char * argv[]) {
         int status;
         aval -> GetElectronEndpoint(i, xe2, ye2, ze2, te2, e2,
                                     xe3, ye3, ze3, te3, e3, status);
-        fprintf(fele, "%f;%f;%f;%f;%f;%d\n", xe3, ye3, ze3, te3, e3, status);
+        fprintf(fele, "%f;%f;%f;%f\n", xe3, ye3, ze3, te3);
       }
     }
   }
@@ -150,27 +128,6 @@ int main(int argc, char * argv[]) {
   std::cout << "\nNumber of Primary Electrons: " << nsum << std::endl;
   std::cout << "Particle Energy Loss: " << esum << std::endl;
   std::cout << "Number of Electron Tracks: " << np << std::endl;
-
-
-  // Geometry and Track Visualization
-  TCanvas *c1 = new TCanvas("tr", "Track");
-  ViewFEMesh* vFE = new ViewFEMesh();
-  vFE -> SetCanvas(c1);
-  vFE -> SetComponent(elm);
-  vFE -> SetPlane(0, -1, 0, 0, 0, 0);
-  vFE -> SetFillMesh(true);
-  vFE -> SetColor(2, kCyan + 1);
-  vFE -> SetColor(2, kOrange + 7);
-  vFE -> SetColor(3, kOrange + 7);
-  vFE -> EnableAxes();
-  vFE -> SetXaxisTitle("x (cm)");
-  vFE -> SetYaxisTitle("z (cm)");
-  vFE -> SetArea(xmin - delta, Z_AXIS, 0., xmax + delta, z0, 0.);
-  vFE -> SetViewDrift(vDrift);
-  vFE -> Plot();
-  c1 -> SaveAs("pion.pdf");
-
-  //app.Run(kTRUE);
 
 
   // Position Histogram
@@ -189,11 +146,17 @@ int main(int argc, char * argv[]) {
     px = atof(line.substr(0, stop1).c_str());
     py = atof(line.substr(stop1 + 1, stop2 - stop1 - 1).c_str());
     pz = atof(line.substr(stop2 + 1, stop3 - stop2 - 1).c_str());
-    if (pz == Z_AXIS) {
+    if (pz <= -R[2]) {
       PosX.push_back(px);
       PosY.push_back(py);
     }
   }
+
+
+  double xmax = *max_element(PosX.begin(), PosX.end());
+  double xmin = *min_element(PosX.begin(), PosX.end());
+  double ymax = *max_element(PosY.begin(), PosY.end());
+  double ymin = *min_element(PosY.begin(), PosY.end());
 
   float read = 0.005;   // 50 micrometers
   float nBinsx = (xmax - xmin) / read;
@@ -203,9 +166,28 @@ int main(int argc, char * argv[]) {
   for (int i = 0; i < PosX.size(); i++) {
     hp -> Fill(PosX[i], PosY[i]);
   }
+
   TCanvas *c2 = new TCanvas("h", "Position");
   hp -> Draw("colz");
   c2 -> SaveAs("hist.pdf");
+
+  // Geometry and Track Visualization
+  TCanvas *c1 = new TCanvas("tr", "Track");
+  ViewFEMesh* vFE = new ViewFEMesh();
+  vFE -> SetCanvas(c1);
+  vFE -> SetComponent(elm);
+  vFE -> SetPlane(0, -1, 0, 0, 0, 0);
+  vFE -> SetFillMesh(true);
+  vFE -> SetColor(2, kCyan + 1);
+  vFE -> SetColor(2, kOrange + 7);
+  vFE -> SetColor(3, kOrange + 7);
+  vFE -> EnableAxes();
+  vFE -> SetXaxisTitle("x (cm)");
+  vFE -> SetYaxisTitle("z (cm)");
+  vFE -> SetArea(xmin, -R[2] - delta, 0., xmax, R[2] + delta, 0.);
+  vFE -> SetViewDrift(vDrift);
+  vFE -> Plot();
+  c1 -> SaveAs("pion.pdf");
 
 
   std::cout << "Exec Time: " << float(clock() - begin_time) / CLOCKS_PER_SEC << std::endl;

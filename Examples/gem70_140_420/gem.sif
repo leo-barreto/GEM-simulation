@@ -72,7 +72,7 @@ End
 ! Upper electrode
 Boundary Condition 1
   Target Boundaries = 5
-  Potential = -1210.0
+  Potential = -1720.0
 End
 
 ! Upper copper plate

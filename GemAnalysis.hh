@@ -308,10 +308,9 @@ void ReadTXTPositionResolution(std::string txtfolder, int nBins) {
 }
 
 
-void PlotElectricField(std::string folder) {
+void PlotElectricPotential(std::string folder) {
 
     std::vector<float> g = SetupInfo(folder);
-    double* range = Range(g, 0.);
     ComponentElmer* Elm = LoadGas(folder);
 
     // GEM constants

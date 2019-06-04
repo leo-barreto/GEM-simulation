@@ -118,7 +118,7 @@ double* GEMRange(std::vector<float> g, double delta = 0.001) {
   // the GEM cell is symmetric (xmin = -xmax) and Vmax = 0 V.
   // For zmax, a small delta is subtracted due to border imperfections.
 
-  double range[4];
+  static double range[4];
   range[0] = g[1] / 4;
   range[1] = sqrt(3) * g[1] / 4;
   range[2] = (g[2] + g[3] + g[4]) / 2 + g[5] - delta;

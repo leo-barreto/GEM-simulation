@@ -102,7 +102,7 @@ End
 Boundary Condition 6
   Target Boundaries = 3
   Periodic BC = 5
-  Periodic BC Rotate(3) = Real 0 180 0
+  Periodic BC Rotate(3) = Real 0 0 180
 End
 
 
@@ -114,5 +114,5 @@ End
 Boundary Condition 8
   Target Boundaries = 4
   Periodic BC = 7
-  Periodic BC Rotate(3) = Real 180 0 0
+  Periodic BC Rotate(3) = Real 0 0 180
 End
