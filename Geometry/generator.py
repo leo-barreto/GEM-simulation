@@ -9,7 +9,7 @@ import time
 GEN_GEOMETRY = True
 GEN_FIELDS = True
 GEN_ROOT = True
-FOLDER_NAME = ''
+FOLDER_NAME = 'er_500'
 
 # Geometry in mm
 RADIUS = 0.035
@@ -21,9 +21,9 @@ DISTANCE_PAD = 1.
 DISTANCE_ELE = 3.
 
 # Electric Field in V/cm; Potential in V.
-E_DRI = 3000
+E_DRI = 1300
 E_IND = 4000
-DELTA_V = 420
+DELTA_V = 500
 PERMITTIVITY_DIE = 3.23 # relative
 
 
@@ -183,7 +183,7 @@ End
 Boundary Condition 6
   Target Boundaries = 3
   Periodic BC = 5
-  Periodic BC Rotate(3) = Real 0 180 0
+  Periodic BC Rotate(3) = Real 0 0 180
 End
 
 
@@ -195,7 +195,7 @@ End
 Boundary Condition 8
   Target Boundaries = 4
   Periodic BC = 7
-  Periodic BC Rotate(3) = Real 180 0 0
+  Periodic BC Rotate(3) = Real 0 0 180
 End''')
 
     sif.close()

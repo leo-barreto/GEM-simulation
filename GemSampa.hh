@@ -655,8 +655,8 @@ void PhotonRes(ComponentElmer* Elm, std::vector<float> g, std::string txtfile,
   // Sensor
   Sensor* sensor = new Sensor();
   sensor -> AddComponent(Elm);
-  sensor -> SetArea(-40 * R[0], -40 * R[1], -R[2] - delta,
-                     40 * R[0], 40 * R[1], R[2] + delta);
+  sensor -> SetArea(-5, -5, -R[2] - delta,
+                     5, 5, R[2] + delta);
 
 
   // Avalanche and Drift Setup
@@ -671,11 +671,11 @@ void PhotonRes(ComponentElmer* Elm, std::vector<float> g, std::string txtfile,
 
   for (int i = n_events; i--;) {
     // Create code for each event
-    int code = RndmUniform();
+    float code = RndmUniform();
 
     // Randomize initial x and y positions
-    double x0 = (2 * RndmUniform() - 1) * R[0];
-    double y0 = (2 * RndmUniform() - 1) * R[1];
+    double x0 = (2 * RndmUniform() - 1) * 0.5;
+    double y0 = (2 * RndmUniform() - 1) * 0.5;
 
 
     // Number of primary electrons, total and effective
