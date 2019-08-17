@@ -1,4 +1,4 @@
-# Generator Script for GEM Geometrical and Electrostatics Conditions
+# Generator Script for GEM Geometric and Electrostatic Conditions
 
 import os
 import time
