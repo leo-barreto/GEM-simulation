@@ -4,18 +4,57 @@ import os
 import time
 
 
+
+# ======================= START OF USER INPUT =======================
 # Parameters
-
-NTOT = 3
 FOLDER_NAME = 'triplegem'
+TYPE = 'ggg'      # g for GEM, t for THGEM
+
+# Geometry in mm
+RADIUS = 0.035
+INTERIOR_RADIUS = RADIUS * 2 / 7
+DISTANCE_HOLES = 0.140
+THICKNESS_DIE = 0.05
+THICKNESS_PLA = 0.005
+DRIFT = 3.
+TRANSFER = 1.
+INDUCTION = 1.
+
+
+# Electric Field in V/cm, Potential in V
+# Choose between writing all potentials (from electrode to readout) or fields
+# and each GEM deltav
+E_DRI = 1000
+E_TRANS = 1000
+E_IND = 4000
+DELTA_V = 400
+POTENTIALS = []
+PERMITTIVITY_DIE = 3.23 # relative
+# ======================= END OF USER INPUT =======================
+
+
+def potential_calculator():
+    p = [0, -E_IND * INDUCTION / 10]
+    if POTENTIALS == []:
+        for i in range(NTOT - 1):
+            p.append(p[-1] - DELTA_V)
+            p.append(p[-1] - E_TRANS * TRANSFER / 10)
+
+        p.append(p[-1] - DELTA_V)
+        p.append(p[-1] - E_DRI * DRIFT / 10)
+        return p[::-1]
+    else:
+        return POTENTIALS
+
+
+
+NTOT = len(TYPE)
 geos = ['testem', 'testem1', 'testem2']
-potentials = [-2100, -1800, -1400, -1300, -900, -800, -400, 0] # 3 * NTOT + 2
 cmd = 'ElmerGrid 2 2 ' + geos[0]
-
-PERMITTIVITY_DIE = 3.23
-
+POTENTIALS = potential_calculator()
 
 
+# Mesh and Elmer preparation
 for i in range(NTOT):
     print('\nSolving for GEM layer [{0} / {1}]...'.format(i + 1, NTOT))
     print('\nMeshing Geometry...')
@@ -30,33 +69,27 @@ cmd += ' -unite -out ' + FOLDER_NAME + ' -merge 1.0e-8 -autoclean'
 os.system(cmd)
 os.system('ElmerGrid 2 2 ' + FOLDER_NAME + ' -centralize')
 
-
 print('\nDeleting Files and Folders...')
 os.system('rm ' + ' '.join([x + '.msh' for x in geos])) #add geo files
 os.system('rm -r ' + ' '.join([x for x in geos]))
 
 
-
-
-
-
 # SIF Files
-
 sif_pot = ''
 WTsif_pot = ''
-for i in range(len(potentials)):
-    pot = potentials[i]
+for i in range(len(POTENTIALS)):
+    pot = POTENTIALS[i]
     bc = str(5 + i)
     sif_pot += '''
 Boundary Condition ''' + bc + '''
     Target Boundaries = ''' + bc + '''
-    Potential = ''' + str(potentials[i]) + '''
+    Potential = ''' + str(POTENTIALS[i]) + '''
 End\n'''
 
     WTsif_pot += '''
 Boundary Condition ''' + bc + '''
     Target Boundaries = ''' + bc + '''
-    Potential = ''' + str(i // (len(potentials) - 1)) + '''
+    Potential = ''' + str(i // (len(POTENTIALS) - 1)) + '''
 End\n'''
 
 print('\nWriting .sif...')
