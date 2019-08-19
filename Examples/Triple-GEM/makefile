@@ -17,7 +17,7 @@ LDFLAGS = `root-config --glibs` -lGeom -lgfortran -lm
 LDFLAGS += -L$(LIBDIR) -lGarfield
 # LDFLAGS += -g
 
-3gem: 3geml.cc
+3gem: 3gem.cc
 	$(CXX) $(CFLAGS) 3gem.cc
 	$(CXX) -o 3gem 3gem.o $(LDFLAGS)
 	rm 3gem.o
