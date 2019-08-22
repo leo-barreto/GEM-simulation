@@ -32,7 +32,7 @@
 
 using namespace Garfield;
 
-void ReadTXTGain(std::string txtfolder) {
+void ReadTXTGain(std::string txtfolder, bool draw = 0) {
 
   std::string folder = "./" + txtfolder;
   DIR* dir = opendir(folder.c_str());
@@ -65,24 +65,23 @@ void ReadTXTGain(std::string txtfolder) {
     }
 
     while (!File.eof()) {
-      File >> line;
-      size_t stop1 = line.find(";");
-      size_t stop2 = line.find(";", stop1 + 1);
-      rg = stod(line.substr(0, stop1));
-      eg = stod(line.substr(stop1 + 1, stop2 - stop1 - 1));
-      RGain.push_back(rg);
-      EGain.push_back(eg);
-    }
+      getline(File, line);
 
-    // Popping last duplicated elements
-    RGain.pop_back();
-    EGain.pop_back();
+      if (line[0] != '#' && line.length() != 0) { // Ignore info
+        size_t stop1 = line.find(";");
+        size_t stop2 = line.find(";", stop1 + 1);
+        rg = stod(line.substr(0, stop1));
+        eg = stod(line.substr(stop1 + 1, stop2 - stop1 - 1));
+        RGain.push_back(rg);
+        EGain.push_back(eg);
+      }
+    }
 
     // Histograms
     int nBins = 100;
     float hmin = 0.;
-    float hmaxR = *max_element(RGain.begin(), RGain.end());
-    float hmaxE = *max_element(EGain.begin(), EGain.end());
+    float hmaxR = 1.1 * *max_element(RGain.begin(), RGain.end());
+    float hmaxE = 1.1 * *max_element(EGain.begin(), EGain.end());
     std::string name_r = "hRGain_" + txts[i].substr(0, txts[i].size() - 4);
     std::string name_e = "hEGain_" + txts[i].substr(0, txts[i].size() - 4);
 
@@ -90,14 +89,27 @@ void ReadTXTGain(std::string txtfolder) {
     TH1I* hEGain = new TH1I(name_e.c_str(), "Effective Gain", nBins, hmin, hmaxE);
 
     for (int i = 0; i < RGain.size(); i++) {
-      hRGain -> Fill(RGain[i]);
-      hEGain -> Fill(EGain[i]);
+      if (EGain[i] > 0) {   // Don't count if nothing is measured
+        hRGain -> Fill(RGain[i]);
+        hEGain -> Fill(EGain[i]);
+      }
     }
 
     std::cout << "\n\nFilled histograms for " << txts[i] << std::endl;
     hRGain -> Write();
     hEGain -> Write();
     std::cout << "Saved histograms for " << txts[i] << std::endl;
+
+    if (draw == 1) {
+      TCanvas* c1 = new TCanvas("", "canvas");
+      c1 -> Divide(1, 2);
+      c1 -> cd(1);
+      hRGain -> Draw();
+      c1 -> cd(2);
+      hEGain -> Draw();
+      std::string image = name_r + ".pdf";
+      c1 -> SaveAs(image.c_str());
+    }
 
     double m1, m2, s1, s2;
     m1 = hRGain -> GetMean();
@@ -185,12 +197,13 @@ void ReadTXTEnergyResolution(std::string txtfolder, bool draw = 0) {
     // Analysis
     hNElectrons -> Fit("gaus", "R", "", hmaxN / 2, hmaxN);
 
-    if (draw == 1){
+    if (draw == 1) {
       TCanvas* c1 = new TCanvas("", "canvas");
       hNElectrons -> Draw();
       std::string image = name_r + ".pdf";
       c1 -> SaveAs(image.c_str());
     }
+
     double mean = hNElectrons -> GetFunction("gaus") -> GetParameter(1);
     double errmean = hNElectrons -> GetFunction("gaus") -> GetParError(1);
     double FWMH = 2.35 * hNElectrons -> GetFunction("gaus") -> GetParameter(2);
@@ -245,18 +258,18 @@ void ReadTXTPositionResolution(std::string txtfolder, int nBins) {
     }
 
     while (!File.eof()) {
-      File >> line;
-      size_t stop1 = line.find(";");
-      size_t stop2 = line.find(";", stop1 + 1);
-      px = stod(line.substr(0, stop1));
-      py = stod(line.substr(stop1 + 1, stop2 - stop1 - 1));
-      PosX.push_back(px);
-      PosY.push_back(py);
+      getline(File, line);
+
+      if (line[0] != '#' && line.length() != 0) { // Ignore info
+        size_t stop1 = line.find(";");
+        size_t stop2 = line.find(";", stop1 + 1);
+        px = stod(line.substr(0, stop1));
+        py = stod(line.substr(stop1 + 1, stop2 - stop1 - 1));
+        PosX.push_back(px);
+        PosY.push_back(py);
+      }
     }
 
-    // Popping last duplicated elements
-    PosX.pop_back();
-    PosY.pop_back();
 
     // Histograms
     float hmin = *min_element(PosX.begin(), PosX.end()) / 7;
