@@ -14,19 +14,19 @@ int main(int argc, char * argv[]) {
 
   ComponentElmer *Elm = LoadGas(folder);
 
-  double xmin = -0.034, xmax = 0.0034, zmin = -0.022, zmax = 0.022;
+  double zmax = 0.309;
   double H = 0.012;
 
 
   // Sensor
   Sensor* sensor = new Sensor();
   sensor -> AddComponent(Elm);
-  sensor -> SetArea(-10, -10, -0.309, 10, 10, 0.309);
+  sensor -> SetArea(-10, -10, -zmax, 10, 10, zmax);
 
 
   // Drift Visualization
   ViewDrift* vDrift = new ViewDrift();
-  vDrift -> SetArea(-10, -10, -0.309, 10, 10, 0.309);
+  vDrift -> SetArea(-10, -10, -zmax, 10, 10, zmax);
 
   // Avalanche Setup
   AvalancheMicroscopic* aval = new AvalancheMicroscopic();
@@ -34,7 +34,7 @@ int main(int argc, char * argv[]) {
   aval -> SetCollisionSteps(1000);
   aval -> EnablePlotting(vDrift);
 
-  aval -> AvalancheElectron(0, 0, 0.3, 0, 0, 0., 0., 0.);
+  aval -> AvalancheElectron(0, 0, zmax - 0.05, 0, 0, 0., 0., 0.);
   std::cout << "Gain: " << aval -> GetNumberOfElectronEndpoints() << std::endl;
 
   // Visualization of Geometry
@@ -43,7 +43,7 @@ int main(int argc, char * argv[]) {
 
   vFE -> SetCanvas(cGeo);
   vFE -> SetComponent(Elm);
-  vFE -> SetPlane(0, -1, 0, 0, 0.006, 0);
+  vFE -> SetPlane(0, -1, 0, 0, H / 2, 0);
   vFE -> SetFillMesh(true);
   vFE -> SetColor(1, kCyan - 3);
   vFE -> SetColor(2, kOrange + 7);
@@ -51,7 +51,7 @@ int main(int argc, char * argv[]) {
   vFE -> EnableAxes();
   vFE -> SetXaxisTitle("x (cm)");
   vFE -> SetYaxisTitle("z (cm)");
-  vFE -> SetArea(-0.05, -0.309, -1, 0.05, 0.309, 1);
+  vFE -> SetArea(-0.05, -zmax, -1, 0.05, zmax, 1);
   vFE -> SetViewDrift(vDrift);
   vFE -> Plot();
 
@@ -65,7 +65,7 @@ int main(int argc, char * argv[]) {
   vF -> SetCanvas(cFie);
   vF -> SetComponent(Elm);
   vF -> SetPlane(0, -1, 0, 0, H / 2, 0);
-  vF -> SetArea(-0.05, -0.309, 0.05, 0.309);
+  vF -> SetArea(-0.05, -zmax, 0.05, zmax);
   vF -> SetVoltageRange(0, -2100);
   vF -> PlotContour("e");
 
