@@ -3,6 +3,7 @@
 import os
 import time
 
+GEN_SETUP = True
 GEN_GEOMETRY = True
 GEN_FIELDS = True
 GEN_ROOT = False
@@ -10,8 +11,8 @@ GEN_ROOT = False
 
 # ======================= START OF USER INPUT =======================
 # Parameters
-FOLDER_NAME = 'triplegem'
-TYPE = 'ggg'      # g for GEM, t for THGEM (THGEM not yet implemented)
+FOLDER_NAME = 'gem_mesh_003'
+TYPE = 'g'      # g for GEM, t for THGEM (THGEM not yet implemented)
 
 # Geometry in mm, all are lists
 RADIUS = [0.035]
@@ -22,14 +23,14 @@ THICKNESS_PLA = [0.005]
 
 # Region in mm, only TRANSFER is a list
 DRIFT = 3.
-TRANSFER = [2.]
-INDUCTION = 2.
+TRANSFER = []
+INDUCTION = 1.
 
 # Electric Field in V/cm; Potential in V, only E_TRANSFER and DELTA_V are lists
-E_DRIFT = 3000
-E_TRANSFER = [5000]
-E_INDUCTION = 5000
-DELTA_V = [400]
+E_DRIFT = 1300
+E_TRANSFER = []
+E_INDUCTION = 4000
+DELTA_V = [440]
 POTENTIALS = []
 PERMITTIVITY_DIE = 3.23 # relative
 # ======================= END OF USER INPUT =======================
@@ -55,25 +56,22 @@ def potential_calculator(regions, fields, deltav, pots):
     else:
         return pots
 
-
-start = time.time()
-NTOT = len(TYPE)
-geos = []
-
-
-# Read user input
-rad = gf.fill_parameter(RADIUS, NTOT)
-s_rad = gf.fill_parameter(SECONDARY_RADIUS, NTOT)
-d_holes = gf.fill_parameter(DISTANCE_HOLES, NTOT)
-t_die = gf.fill_parameter(THICKNESS_DIE, NTOT)
-t_pla = gf.fill_parameter(THICKNESS_PLA, NTOT)
-regions = [DRIFT] + gf.fill_parameter(TRANSFER, NTOT - 1) + [INDUCTION]
-fields = [E_DRIFT] + gf.fill_parameter(E_TRANSFER, NTOT - 1) + [E_INDUCTION]
-deltav = gf.fill_parameter(DELTA_V, NTOT)
-potentials = gf.potential_calculator(regions, fields, deltav, POTENTIALS)
+if GEN_SETUP:
+    start = time.time()
+    NTOT = len(TYPE)
 
 
-if GEN_GEOMETRY:
+    # Read user input
+    rad = fill_parameter(RADIUS, NTOT)
+    s_rad = fill_parameter(SECONDARY_RADIUS, NTOT)
+    d_holes = fill_parameter(DISTANCE_HOLES, NTOT)
+    t_die = fill_parameter(THICKNESS_DIE, NTOT)
+    t_pla = fill_parameter(THICKNESS_PLA, NTOT)
+    regions = [DRIFT] + fill_parameter(TRANSFER, NTOT - 1) + [INDUCTION]
+    fields = [E_DRIFT] + fill_parameter(E_TRANSFER, NTOT - 1) + [E_INDUCTION]
+    deltav = fill_parameter(DELTA_V, NTOT)
+    potentials = potential_calculator(regions, fields, deltav, POTENTIALS)
+
     # Calculate regions for each cell
     ele = []
     pad = []
@@ -91,9 +89,8 @@ if GEN_GEOMETRY:
             pad.append(regions[i + 1] / 2)
 
 
+if GEN_GEOMETRY:
     geos = []
-
-
     # Write .geo scripts
     for i in range(NTOT):
         geo_name = 'gem_part' + str(i)
@@ -130,8 +127,12 @@ if GEN_GEOMETRY:
             cmd += ' -in ' + geos[i]
 
     cmd += ' -unite -out ' + FOLDER_NAME + ' -merge 1.0e-8 -autoclean'
-    os.system(cmd)
-    os.system('ElmerGrid 2 2 ' + FOLDER_NAME + ' -centralize')
+
+    if NTOT > 1:
+        os.system(cmd)
+        os.system('ElmerGrid 2 2 ' + FOLDER_NAME + ' -centralize')
+    else:
+        os.system('ElmerGrid 14 2 ' + geo_name + '.msh -out ' + FOLDER_NAME +' -autoclean -centralize')
 
     print('\nDeleting Files and Folders...')
     os.system('rm ' + ' '.join([x + '.geo' for x in geos]))
@@ -146,16 +147,16 @@ if GEN_FIELDS:
     for i in range(len(potentials)):
         bc = str(5 + i)
         sif_pot += '''
-    Boundary Condition ''' + bc + '''
-        Target Boundaries = ''' + bc + '''
-        Potential = ''' + str(potentials[i]) + '''
-    End\n'''
+Boundary Condition ''' + bc + '''
+    Target Boundaries = ''' + bc + '''
+    Potential = ''' + str(potentials[i]) + '''
+End\n'''
 
         WTsif_pot += '''
-    Boundary Condition ''' + bc + '''
-        Target Boundaries = ''' + bc + '''
-        Potential = ''' + str(i // (len(potentials) - 1)) + '''
-    End\n'''
+Boundary Condition ''' + bc + '''
+    Target Boundaries = ''' + bc + '''
+    Potential = ''' + str(i // (len(potentials) - 1)) + '''
+End\n'''
 
     print('\nWriting .sif...')
     sif = open(FOLDER_NAME + '/' + 'gem.sif', 'w')
@@ -163,116 +164,116 @@ if GEN_FIELDS:
 
 
     header = '''Header
-      CHECK KEYWORDS Warn
-      Mesh DB "." "."
-      Include Path ""
-      Results Directory ""
-    End
+  CHECK KEYWORDS Warn
+  Mesh DB "." "."
+  Include Path ""
+  Results Directory ""
+End
 
-    Simulation
-      Coordinate System = Cartesian 3D
-      Simulation Type = Steady State
-      Steady State Max Iterations = 1
-      Output File = "gem.result"
-      Post File = "gem.ep"
-    End
+Simulation
+  Coordinate System = Cartesian 3D
+  Simulation Type = Steady State
+  Steady State Max Iterations = 1
+  Output File = "gem.result"
+  Post File = "gem.ep"
+End
     '''
     headerWT = '''Header
-      CHECK KEYWORDS Warn
-      Mesh DB "." "."
-      Include Path ""
-      Results Directory ""
-    End
+  CHECK KEYWORDS Warn
+  Mesh DB "." "."
+  Include Path ""
+  Results Directory ""
+End
 
-    Simulation
-      Coordinate System = Cartesian 3D
-      Simulation Type = Steady State
-      Steady State Max Iterations = 1
-      Output File = "gemWT.result"
-      Post File = "gemWT.ep"
-    End
+Simulation
+  Coordinate System = Cartesian 3D
+  Simulation Type = Steady State
+  Steady State Max Iterations = 1
+  Output File = "gemWT.result"
+  Post File = "gemWT.ep"
+End
     '''
     sif_str = '''Constants
-      Permittivity Of Vacuum = 8.8542e-12
-    End
+  Permittivity Of Vacuum = 8.8542e-12
+End
 
-    Body 1
-      Equation = 1
-      Material = 1
-    End
+Body 1
+  Equation = 1
+  Material = 1
+End
 
-    Body 2
-      Equation = 1
-      Material = 2
-    End
+Body 2
+  Equation = 1
+  Material = 2
+End
 
-    Body 3
-      Equation = 1
-      Material = 3
-    End
+Body 3
+  Equation = 1
+  Material = 3
+End
 
-    Body 4
-      Equation = 1
-      Material = 3
-    End
+Body 4
+  Equation = 1
+  Material = 3
+End
 
-    Solver 1
-      Equation = Stat Elec Solver
-      Variable = Potential
-      Variable DOFs = 1
-      Procedure = "StatElecSolve" "StatElecSolver"
-      Calculate Electric Field = True
-      Calculate Electric Flux = False
-      Linear System Solver = Iterative
-      Linear System Iterative Method = BiCGStab
-      Linear System Max Iterations = 1000
-      Linear System Abort Not Converged = True
-      Linear System Convergence Tolerance = 1.0e-10
-      Linear System Preconditioning = ILU1
-      Steady State Convergence Tolerance = 5.0e-7
-    End
+Solver 1
+  Equation = Stat Elec Solver
+  Variable = Potential
+  Variable DOFs = 1
+  Procedure = "StatElecSolve" "StatElecSolver"
+  Calculate Electric Field = True
+  Calculate Electric Flux = False
+  Linear System Solver = Iterative
+  Linear System Iterative Method = BiCGStab
+  Linear System Max Iterations = 1000
+  Linear System Abort Not Converged = True
+  Linear System Convergence Tolerance = 1.0e-10
+  Linear System Preconditioning = ILU1
+  Steady State Convergence Tolerance = 5.0e-7
+End
 
-    ! Gas
-    Material 1
-      Relative Permittivity = 1
-    End
+! Gas
+Material 1
+  Relative Permittivity = 1
+End
 
-    ! Dielectric
-    Material 2
-      Relative Permittivity = ''' + str(PERMITTIVITY_DIE) + '''
-    End
+! Dielectric
+Material 2
+  Relative Permittivity = ''' + str(PERMITTIVITY_DIE) + '''
+End
 
-    ! Copper
-    Material 3
-      Relative Permittivity = 1.0e10
-    End
-
-
-    ! Periodicity in X
-    Boundary Condition 1
-      Target Boundaries = 1
-    End
-
-    Boundary Condition 2
-      Target Boundaries = 3
-      Periodic BC = 1
-      Periodic BC Rotate(3) = Real 0 0 180
-    End
+! Copper
+Material 3
+  Relative Permittivity = 1.0e10
+End
 
 
-    ! Periodicity in Y
-    Boundary Condition 3
-      Target Boundaries = 2
-    End
+! Periodicity in X
+Boundary Condition 1
+  Target Boundaries = 1
+End
 
-    Boundary Condition 4
-      Target Boundaries = 4
-      Periodic BC = 3
-      Periodic BC Rotate(3) = Real 0 0 180
-    End
+Boundary Condition 2
+  Target Boundaries = 3
+  Periodic BC = 1
+  Periodic BC Rotate(3) = Real 0 0 180
+End
 
 
-    ! Potential definitions'''
+! Periodicity in Y
+Boundary Condition 3
+  Target Boundaries = 2
+End
+
+Boundary Condition 4
+  Target Boundaries = 4
+  Periodic BC = 3
+  Periodic BC Rotate(3) = Real 0 0 180
+End
+
+
+! Potential definitions'''
 
     sif.write(header + sif_str + sif_pot)
     sif.close()
@@ -300,4 +301,5 @@ if GEN_FIELDS:
 
 
 time = time.time() - start
+print(potentials)
 print('\n\nDONE! (in %.2f seconds)' % time)
