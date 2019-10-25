@@ -9,7 +9,7 @@ import time
 GEN_GEOMETRY = True
 GEN_FIELDS = True
 GEN_ROOT = True
-FOLDER_NAME = 'er_500'
+FOLDER_NAME = 'mesh_440'
 
 # Geometry in mm
 RADIUS = 0.035
@@ -23,7 +23,7 @@ DISTANCE_ELE = 3.
 # Electric Field in V/cm; Potential in V.
 E_DRI = 1300
 E_IND = 4000
-DELTA_V = 500
+DELTA_V = 440
 PERMITTIVITY_DIE = 3.23 # relative
 
 

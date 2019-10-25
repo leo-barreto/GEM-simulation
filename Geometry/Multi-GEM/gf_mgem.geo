@@ -19,9 +19,9 @@ Function gf_mgem
   H = Sqrt(3) * DISTANCE_HOLES / 2;
 
   // Characteristic Distances
-  lc_D = DISTANCE_HOLES / 15;
-  lc_P = DISTANCE_HOLES / 15;
-  lc_M = (DISTANCE_ELE + DISTANCE_PAD) / 10;
+  lc_D = DISTANCE_HOLES / 30;
+  lc_P = DISTANCE_HOLES / 30;
+  lc_M = 0.005;
 
 
   // Defining Points

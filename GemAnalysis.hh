@@ -40,6 +40,7 @@ void ReadTXTGain(std::string txtfolder, bool draw = 0) {
   std::vector<std::string> txts;
   std::string line;
   int rg, eg;
+  double t;
   std::string rootname = folder + "_hists.root";
 
 
@@ -58,6 +59,7 @@ void ReadTXTGain(std::string txtfolder, bool draw = 0) {
     std::ifstream File;
     File.open(txts[i].c_str());
     std::vector<int> RGain, EGain;
+    std::vector<double> time;
 
     if (File.fail()) {
       std::cerr << "\nFailed to open file\n" << std::endl;
@@ -71,9 +73,11 @@ void ReadTXTGain(std::string txtfolder, bool draw = 0) {
         size_t stop1 = line.find(";");
         size_t stop2 = line.find(";", stop1 + 1);
         rg = stod(line.substr(0, stop1));
-        eg = stod(line.substr(stop1 + 1, stop2 - stop1 - 1));
+        eg = stod(line.substr(stop1 + 1, stop2));
+        t = stod(line.substr(stop2 + 1, line.size()));
         RGain.push_back(rg);
         EGain.push_back(eg);
+        time.push_back(t);
       }
     }
 
@@ -82,16 +86,19 @@ void ReadTXTGain(std::string txtfolder, bool draw = 0) {
     float hmin = 0.;
     float hmaxR = 1.1 * *max_element(RGain.begin(), RGain.end());
     float hmaxE = 1.1 * *max_element(EGain.begin(), EGain.end());
+    float hmaxT = 1.1 * *max_element(time.begin(), time.end());
     std::string name_r = "hRGain_" + txts[i].substr(0, txts[i].size() - 4);
     std::string name_e = "hEGain_" + txts[i].substr(0, txts[i].size() - 4);
 
     TH1I* hRGain = new TH1I(name_r.c_str(), "Real Gain", nBins, hmin, hmaxR);
     TH1I* hEGain = new TH1I(name_e.c_str(), "Effective Gain", nBins, hmin, hmaxE);
+    TH1F* hT = new TH1F("Time", "Time", nBins, hmin, hmaxT);
 
     for (int i = 0; i < RGain.size(); i++) {
-      if (EGain[i] > 0) {   // Don't count if nothing is measured
+      if (EGain[i] > 0) {
         hRGain -> Fill(RGain[i]);
         hEGain -> Fill(EGain[i]);
+        hT -> Fill(time[i]);
       }
     }
 
@@ -119,6 +126,7 @@ void ReadTXTGain(std::string txtfolder, bool draw = 0) {
     std::cout << "Real Gain: " << m1 << "(" << s1 << ")" << std::endl;
     std::cout << "Effective Gain: " << m2 << "(" << s2 << ")" << std::endl;
     std::cout << "Number of Entries: " << hRGain -> GetEntries() << std::endl;
+    std::cout << "Average time: " << hT -> GetMean() << std::endl;
 
   }
 
@@ -170,12 +178,9 @@ void ReadTXTEnergyResolution(std::string txtfolder, bool draw = 0) {
         if (ne > 300) {
           NElectrons.push_back(ne);
         }
-        //NElectrons.push_back(ne);
       }
     }
 
-    // Popping last duplicated elements
-    //NElectrons.pop_back();
 
     // Histograms
     int nBins = 100;
@@ -378,6 +383,8 @@ void PlotMesh(ComponentElmer* Elm, double info[9]) {
   vFE -> SetArea(-1.5 * DIST, -3 * T_DIE - Center, -1., 1.5 * DIST, 3 * T_DIE - Center, 1.);
   vFE -> Plot();
 
+  std::string image = "mesh.pdf";
+  cGeo -> SaveAs(image.c_str());
 }
 
 

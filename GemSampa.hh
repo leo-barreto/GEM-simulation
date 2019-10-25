@@ -147,13 +147,15 @@ ComponentElmer* LoadGas(std::string folder, double percent = 70.,
   elm -> PrintRange();
 
 
-  double o2 = ppm * 1E-4;
-  double co2 = 100. - percent - o2;
+  double n2 = ppm * 4 / 5;
+  double o2 = ppm / 5;
+  double co2 = 100. - percent;
+  double ar = percent - o2 - n2;
 
 
   // Medium
   MediumMagboltz* gas = new MediumMagboltz();
-  gas -> SetComposition(noble, percent, "co2", co2, "o2", o2);
+  gas -> SetComposition(noble, ar, "co2", co2, "o2", o2, "n2", n2);
   gas -> SetTemperature(temp);
   gas -> SetPressure(press);
   gas -> SetMaxElectronEnergy(2000.);
@@ -166,6 +168,9 @@ ComponentElmer* LoadGas(std::string folder, double percent = 70.,
   else {
    gas -> DisablePenningTransfer();
   }
+
+  const std::string path = getenv("GARFIELD_HOME");
+  gas -> LoadIonMobility(path + "/Data/IonMobility_Ar+_Ar.txt");
 
   int nMaterials = elm -> GetNumberOfMaterials();
   for (int i = 0; i < nMaterials; ++i) {

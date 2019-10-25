@@ -11,7 +11,7 @@ GEN_ROOT = False
 
 # ======================= START OF USER INPUT =======================
 # Parameters
-FOLDER_NAME = 'gem_mesh_003'
+FOLDER_NAME = 'gem_exemplo'
 TYPE = 'g'      # g for GEM, t for THGEM (THGEM not yet implemented)
 
 # Geometry in mm, all are lists
@@ -22,15 +22,15 @@ THICKNESS_DIE = [0.05]
 THICKNESS_PLA = [0.005]
 
 # Region in mm, only TRANSFER is a list
-DRIFT = 3.
+DRIFT = 1.
 TRANSFER = []
 INDUCTION = 1.
 
 # Electric Field in V/cm; Potential in V, only E_TRANSFER and DELTA_V are lists
-E_DRIFT = 1300
-E_TRANSFER = []
-E_INDUCTION = 4000
-DELTA_V = [440]
+E_DRIFT = 1000
+E_TRANSFER = [3000]
+E_INDUCTION = 5000
+DELTA_V = [500]
 POTENTIALS = []
 PERMITTIVITY_DIE = 3.23 # relative
 # ======================= END OF USER INPUT =======================
