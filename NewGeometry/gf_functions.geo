@@ -21,15 +21,6 @@ bnd_s4 = {}; // -X
 Function gf_plane
   // Creates the necessary points and lines for each GEM plane
 
-  /* X1 = X0 - D / 2 - R;
-  X2 = X0 - D / 2;
-  X3 = X0 + D / 2;
-  X4 = X0 + D / 2 + R;
-  Y1 = Y0 + D / 2 + R;
-  Y2 = Y0 + D / 2;
-  Y3 = Y0 - D / 2;
-  Y4 = Y0 - D / 2 - R; */
-
   X1 = X0 - D / 2;
   X2 = X0 - D / 2 + R;
   X3 = X0 + D / 2 - R;

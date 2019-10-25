@@ -1,8 +1,12 @@
 Include "gf_functions.geo";
 
+// GEM layers parameters
+NTOT = 1;
+ID = 0;
+
 // All parameters in mm
-X = 0; Y = 0; Z = 0; // Center of GEM
-DIST = 0.14;               // Distance between holes
+X = 0; Y = 0; Z = 0;    // Center of GEM
+DIST = 0.14;            // Distance between holes
 
 // Copper plates
 R1 = 0.035;             // Radius of upper plate
@@ -11,12 +15,9 @@ TPLA1 = 0.005;          // Thickness of upper plate
 TPLA2 = 0.005;          // Thickness of lower plate
 
 // Dieletric
-/* NDIE = 3;                      // Number of dieletric planes
+NDIE = 3;                      // Number of dieletric planes
 POSDIE = {0.025, 0, -0.025};   // Positions of dieletric planes
-RDIE = {0.035, 0.025, 0.035};  // Radius of each dieletric plane */
-NDIE = 2;                      // Number of dieletric planes
-POSDIE = {0.025, -0.025};   // Positions of dieletric planes
-RDIE = {0.035, 0.035};  // Radius of each dieletric plane
+RDIE = {0.035, 0.025, 0.035};  // Radius of each dieletric plane
 TDIE = POSDIE[0] - POSDIE[NDIE - 1];  // Thickness of dieletric
 
 // Chamber
@@ -147,10 +148,16 @@ Function gf_gem
 
 
   // Physical Surfaces (Potential)
-  b1 = newreg; Physical Surface(b1) = {s1};   // +Z
+  If (ID == 0)
+      b1 = newreg; Physical Surface(b1) = {s1};   // +Z
+    Printf("Part of the first detector layer");
+  EndIf
   b2 = newreg; Physical Surface(b2) = slup[]; // Upper Plate
   b3 = newreg; Physical Surface(b3) = sllo[]; // Lower Plate
-  b4 = newreg; Physical Surface(b4) = {s2};   // -Z
+  If (ID == NTOT - 1)
+    b4 = newreg; Physical Surface(b4) = {s2};   // -Z
+    Printf("Part of the last detector layer");
+  EndIf
 
 
 
