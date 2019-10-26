@@ -12,7 +12,7 @@ GEN_ROOT = False
 # ======================= START OF USER INPUT =======================
 # Parameters
 FOLDER_NAME = 'gem_exemplo'
-NTOT = 1    # Only Single-GEM for now, remove this when fixed
+NTOT = 2    # Only Single-GEM for now, remove this when fixed
 SHIFT_X = [0]
 SHIFT_Y = [0]
 
@@ -24,9 +24,9 @@ THICKNESS_UPPER_PLA = [0.005]
 THICKNESS_LOWER_PLA = [0.005]
 # Inner Geometry of the Dieletric
 # Note that THICKNESS_DIE = POSDIE[0] - POSDIE[NDIE - 1]
-NDIE = 3                      # Number of dieletric planes
-POSDIE = [0.025, 0, -0.025]   # Positions of dieletric planes
-RDIE = [0.035, 0.025, 0.035]  # Radius of each dieletric plane
+NDIE = [3]                      # Number of dieletric planes
+POSDIE = [[0.025, 0, -0.025]]   # Positions of dieletric planes
+RDIE = [[0.035, 0.025, 0.035]]  # Radius of each dieletric plane
 
 # Region in mm, only TRANSFER is a list
 DRIFT = 1.
@@ -75,6 +75,9 @@ if GEN_SETUP:
     d_holes = fill_parameter(DISTANCE_HOLES, NTOT)
     t_pla1 = fill_parameter(THICKNESS_UPPER_PLA, NTOT)
     t_pla2 = fill_parameter(THICKNESS_LOWER_PLA, NTOT)
+    ndie = fill_parameter(NDIE, NTOT)
+    posdie = fill_parameter(POSDIE, NTOT)
+    rdie = fill_parameter(RDIE, NTOT)
     regions = [DRIFT] + fill_parameter(TRANSFER, NTOT - 1) + [INDUCTION]
     fields = [E_DRIFT] + fill_parameter(E_TRANSFER, NTOT - 1) + [E_INDUCTION]
     deltav = fill_parameter(DELTA_V, NTOT)
@@ -89,12 +92,19 @@ if GEN_SETUP:
             ele.append(regions[0])
         else:
             ele.append(regions[i] / 2)
-            translate.append(translate[-1] - ele[i] - pad[i - 1] - t_die[i - 1] - 2 * t_pla[i - 1])
+            tdie1 = posdie[i - 1][0] - posdie[i - 1][ndie[i - 1] - 1]
+            tdie2 = posdie[i][0] - posdie[i][ndie[i] - 1]
+            translate.append(translate[-1] - ele[i] - pad[i - 1] - \
+                            (tdie1 + tdie2) / 2 - t_pla1[i] - t_pla2[i - 1])
 
         if i == NTOT - 1:
             pad.append(regions[-1])
         else:
             pad.append(regions[i + 1] / 2)
+
+    print(ele)
+    print(pad)
+    print(translate)
 
 
 if GEN_GEOMETRY:
@@ -119,12 +129,12 @@ if GEN_GEOMETRY:
         geo_file.write('TPLA1 = ' + str(t_pla1[i]) + ';\n')
         geo_file.write('TPLA2 = ' + str(t_pla2[i]) + ';\n')
         # Dielectric
-        geo_file.write('NDIE = ' + str(NDIE) + ';\n')
-        geo_file.write('POSDIE = {' +  ",".join([str(x) for x in POSDIE]) + '};\n')
-        geo_file.write('RDIE = {' +  ",".join([str(x) for x in RDIE]) + '};\n')
+        geo_file.write('NDIE = ' + str(ndie[i]) + ';\n')
+        geo_file.write('POSDIE = {' +  ",".join([str(x) for x in posdie[i]]) + '};\n')
+        geo_file.write('RDIE = {' +  ",".join([str(x) for x in rdie[i]]) + '};\n')
         # Regions
-        geo_file.write('DRI = ' + str(pad[i]) + ';\n')
-        geo_file.write('IND = ' + str(ele[i]) + ';\n')
+        geo_file.write('DRI = ' + str(ele[i]) + ';\n')
+        geo_file.write('IND = ' + str(pad[i]) + ';\n')
         geo_file.write('Call gf_gem;')
         geo_file.close()
 
@@ -152,9 +162,9 @@ if GEN_GEOMETRY:
         os.system('ElmerGrid 14 2 ' + geo_name + '.msh -out ' + FOLDER_NAME +' -autoclean -centralize')
 
     print('\nDeleting Files and Folders...')
-    os.system('rm ' + ' '.join([x + '.geo' for x in geos]))
-    os.system('rm ' + ' '.join([x + '.msh' for x in geos]))
-    os.system('rm -r ' + ' '.join([x for x in geos]))
+    # os.system('rm ' + ' '.join([x + '.geo' for x in geos]))
+    # os.system('rm ' + ' '.join([x + '.msh' for x in geos]))
+    # os.system('rm -r ' + ' '.join([x for x in geos]))
 
 
 if GEN_FIELDS:

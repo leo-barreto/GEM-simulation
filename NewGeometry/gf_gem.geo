@@ -48,8 +48,8 @@ Function gf_gem
   // Up Plate
   outup = {};
   pmin = newp; lmin = newl;
-  Z0 = TDIE / 2 + TPLA1; R = R1; D = DIST; Call gf_plane;
-  Z0 = TDIE / 2; Call gf_plane;
+  Z0 = Z + TDIE / 2 + TPLA1; R = R1; D = DIST; Call gf_plane;
+  Z0 = Z + TDIE / 2; Call gf_plane;
   Call VerticalLines;
   Call Loops;
   slup = loops[];
@@ -67,9 +67,9 @@ Function gf_gem
 
   For j In {0 : NDIE - 2}
     pmin = newp; lmin = newl;
-    Z0 = POSDIE[j]; R = RDIE[j];
+    Z0 = Z + POSDIE[j]; R = RDIE[j];
     Call gf_plane;
-    Z0 = POSDIE[j + 1]; R = RDIE[j + 1];
+    Z0 = Z + POSDIE[j + 1]; R = RDIE[j + 1];
     Call gf_plane;
     Call VerticalLines;
     Call Loops;
@@ -89,8 +89,8 @@ Function gf_gem
 
   // Low Plate
   pmin = newp; lmin = newl;
-  Z0 = -TDIE / 2; R = R2; Call gf_plane;
-  Z0 = -TDIE / 2 - TPLA2; Call gf_plane;
+  Z0 = Z - TDIE / 2; R = R2; Call gf_plane;
+  Z0 = Z - TDIE / 2 - TPLA2; Call gf_plane;
   Call VerticalLines;
   Call Loops;
   sllo = loops[];
@@ -103,7 +103,7 @@ Function gf_gem
 
 
   // Chamber
-  ZTOP = TDIE / 2 + TPLA1 + DRI; ZBOT = -TDIE / 2 - TPLA2 - IND; lc = ZTOP / 10;
+  ZTOP = Z + TDIE / 2 + TPLA1 + DRI; ZBOT = Z - TDIE / 2 - TPLA2 - IND; lc = 0.1;
   pC1 = newp; Point(pC1) = {X1, Y1, ZTOP, lc}; // Mid Up-Left
   pC2 = newp; Point(pC2) = {X4, Y1, ZTOP, lc}; // Mid Up-Right
   pC3 = newp; Point(pC3) = {X4, Y4, ZTOP, lc}; // Mid Down-Right
@@ -149,13 +149,13 @@ Function gf_gem
 
   // Physical Surfaces (Potential)
   If (ID == 0)
-      b1 = newreg; Physical Surface(b1) = {s1};   // +Z
+      b1 = newreg; Physical Surface(b1 + 8 * ID) = {s1};   // +Z
     Printf("Part of the first detector layer");
   EndIf
-  b2 = newreg; Physical Surface(b2) = slup[]; // Upper Plate
-  b3 = newreg; Physical Surface(b3) = sllo[]; // Lower Plate
+  b2 = newreg; Physical Surface(b2 + 8 * ID) = slup[]; // Upper Plate
+  b3 = newreg; Physical Surface(b3 + 8 * ID) = sllo[]; // Lower Plate
   If (ID == NTOT - 1)
-    b4 = newreg; Physical Surface(b4) = {s2};   // -Z
+    b4 = newreg; Physical Surface(b4 + 8 * ID) = {s2};   // -Z
     Printf("Part of the last detector layer");
   EndIf
 
