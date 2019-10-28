@@ -36,7 +36,6 @@ Function gf_gem
   Else
     RINGUP = 0;
   EndIf
-  Printf("%g", RINGUP);
 
   If (RDIE[NDIE - 1] != R2)
     RINGLO = 1;
@@ -103,7 +102,7 @@ Function gf_gem
 
 
   // Chamber
-  ZTOP = Z + TDIE / 2 + TPLA1 + DRI; ZBOT = Z - TDIE / 2 - TPLA2 - IND; lc = 0.1;
+  ZTOP = Z + TDIE / 2 + TPLA1 + DRI; ZBOT = Z - TDIE / 2 - TPLA2 - IND; lc = 0.05;
   pC1 = newp; Point(pC1) = {X1, Y1, ZTOP, lc}; // Mid Up-Left
   pC2 = newp; Point(pC2) = {X4, Y1, ZTOP, lc}; // Mid Up-Right
   pC3 = newp; Point(pC3) = {X4, Y4, ZTOP, lc}; // Mid Down-Right
@@ -141,30 +140,34 @@ Function gf_gem
 
 
   // Boundaries
-  bc1 = newreg; Physical Surface(bc1) = {s3, bnd_s1[]}; // +Y
-  bc2 = newreg; Physical Surface(bc2) = {s4, bnd_s2[]}; // +X
-  bc3 = newreg; Physical Surface(bc3) = {s5, bnd_s3[]}; // -Y
-  bc4 = newreg; Physical Surface(bc4) = {s6, bnd_s4[]}; // -X
+  // Index must be fixed for multigem
+  index_fixed = 100000;
+  Physical Surface(index_fixed) = {s3, bnd_s1[]}; // +Y
+  Physical Surface(index_fixed + 1) = {s4, bnd_s2[]}; // +X
+  Physical Surface(index_fixed + 2) = {s5, bnd_s3[]}; // -Y
+  Physical Surface(index_fixed + 3) = {s6, bnd_s4[]}; // -X
 
 
   // Physical Surfaces (Potential)
+  idreg = 2 * index_fixed + 8 * ID;
   If (ID == 0)
-      b1 = newreg; Physical Surface(b1 + 8 * ID) = {s1};   // +Z
+    Physical Surface(idreg) = {s1};   // +Z
     Printf("Part of the first detector layer");
   EndIf
-  b2 = newreg; Physical Surface(b2 + 8 * ID) = slup[]; // Upper Plate
-  b3 = newreg; Physical Surface(b3 + 8 * ID) = sllo[]; // Lower Plate
+  Physical Surface(idreg + 1) = slup[]; // Upper Plate
+  Physical Surface(idreg + 2) = sllo[]; // Lower Plate
   If (ID == NTOT - 1)
-    b4 = newreg; Physical Surface(b4 + 8 * ID) = {s2};   // -Z
+    Physical Surface(idreg + 3) = {s2};   // -Z
     Printf("Part of the last detector layer");
   EndIf
 
 
 
   // Physical Volumes
-  vdie = newreg; Physical Volume(vdie) = {vdie_a[]};
-  vpla1 = newreg; Physical Volume(vpla1) = {vup};
-  vpla2 = newreg; Physical Volume(vpla2) = {vlo};
+  index_v = 3 * index_fixed;
+  Physical Volume(index_v) = {vdie_a[]};
+  Physical Volume(index_v + 1) = {vup};
+  Physical Volume(index_v + 2) = {vlo};
 
 
   // Before defining the gas volume, we apply coherence so any duplicated entity
@@ -186,7 +189,7 @@ Function gf_gem
   array += outlo[];
   sl = newsl; Surface Loop(sl) = array[];
   vchamber = newv; Volume(vchamber) = {sl};
-  vgas = newreg; Physical Volume(vgas) = {vchamber};
+  Physical Volume(index_v + 3) = {vchamber};
 
 
   // Help to to visualize each volume
