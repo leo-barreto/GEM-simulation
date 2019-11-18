@@ -46,19 +46,6 @@ void SetupInfoManual(double gem[9], double diam, double dist,
 }
 
 
-
-/*std::vector<float> SetupInfo(std::string folder) {
-
-
-  std::vector<float>* f;
-  std::string infoloc = folder + "/info.root";
-  const char* il = infoloc.c_str();
-  TFile* F = new TFile(il);
-  F -> GetObject("info", f);
-  std::vector<float> g = *f;
-  return g;
-}*/
-
 std::vector<float> SetupInfo(std::string folder) {
 
 
@@ -142,20 +129,24 @@ ComponentElmer* LoadGas(std::string folder, double percent = 70.,
                                           folder + "/dielectrics.dat",
                                           folder + "/gem.result", "mm");
   elm -> SetWeightingField(folder + "/gemWT.result", "WT");
-  elm -> EnableMirrorPeriodicityX();
-  elm -> EnableMirrorPeriodicityY();
+  //elm -> EnableMirrorPeriodicityX();
+  elm -> EnablePeriodicityX();
+  //elm -> EnableMirrorPeriodicityY();
+  elm -> EnablePeriodicityY();
   elm -> PrintRange();
 
 
-  double n2 = ppm * 4 / 5;
-  double o2 = ppm / 5;
+  // double n2 = ppm * 4 / 5;
+  // double o2 = ppm / 5;
+  // double co2 = 100. - percent;
+  // double ar = percent - o2 - n2;
   double co2 = 100. - percent;
-  double ar = percent - o2 - n2;
+  double ar = percent;
 
 
   // Medium
   MediumMagboltz* gas = new MediumMagboltz();
-  gas -> SetComposition(noble, ar, "co2", co2, "o2", o2, "n2", n2);
+  gas -> SetComposition(noble, ar, "co2", co2);
   gas -> SetTemperature(temp);
   gas -> SetPressure(press);
   gas -> SetMaxElectronEnergy(2000.);
@@ -766,6 +757,72 @@ double Fe55() {
   }
 
   return energy;
+}
+
+
+
+void NGain(ComponentElmer* Elm, std::string txtfile, double zmax, double driftzone, int n_events = 100) {
+
+  // Sensor
+  Sensor* sensor = new Sensor();
+  sensor -> AddComponent(Elm);
+  sensor -> SetArea(-10, -10, -zmax, 10, 10, zmax);
+
+
+  // Avalanche and Drift Setup
+  AvalancheMicroscopic* aval = new AvalancheMicroscopic();
+  aval -> SetSensor(sensor);
+
+  // File
+  FILE* file;
+  const char* f_title = txtfile.c_str();
+
+
+  // Avalanches Calculations
+  for (int i = n_events; i--;) {
+    clock_t begin_time = clock();
+
+    // Random Initial Positions
+    double z0 = zmax - driftzone * RndmUniform();
+    std::cout << "Z0: " << z0 << std::endl;
+    // double x0 = (2 * RndmUniform() - 1) / 2;
+    // double y0 = (2 * RndmUniform() - 1) / 2;
+    double x0 = 0;
+    double y0 = 0;
+    aval -> AvalancheElectron(x0, y0, z0, 0, 1., 0., 0., 0.); // E0 = 0.1 eV
+    int np = aval -> GetNumberOfElectronEndpoints();
+    int ne = 0, ni = 0, nf = 0;
+    aval -> GetAvalancheSize(ne, ni);
+
+
+    // Final Positions Analysis
+    double xe1, ye1, ze1, te1, e1;
+    double xe2, ye2, ze2, te2, e2;
+    int status;
+    for (int j = np; j--;) {
+      aval -> GetElectronEndpoint(j, xe1, ye1, ze1, te1, e1,
+                                  xe2, ye2, ze2, te2, e2, status);
+
+      if (ze2 <= -zmax + 0.001) {  // Added a delta to minimize border effects
+        nf += 1;
+      }
+    }
+
+
+    // Saving Gains
+    file = fopen(f_title, "a");
+    float min = float(clock() - begin_time) / (CLOCKS_PER_SEC * 60);
+    fprintf(file, "%d;%d;%.2f\n", np, nf, min);
+    fclose(file);
+
+    if (np == 1) {
+      i += 1;         // No multiplication doesn't add to counter
+    }
+
+    std::cout << i << "/" << n_events << std::endl;
+    std::cout << "gain: " << nf << std::endl;
+
+  }
 }
 
 
