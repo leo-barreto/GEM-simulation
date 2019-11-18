@@ -39,7 +39,7 @@ void ReadTXTGain(std::string txtfolder, bool draw = 0) {
   dirent* pdir;
   std::vector<std::string> txts;
   std::string line;
-  int rg, eg;
+  double rg, eg;
   double t;
   std::string rootname = folder + "_hists.root";
 
@@ -58,7 +58,7 @@ void ReadTXTGain(std::string txtfolder, bool draw = 0) {
   for (int i = 0; i < txts.size(); i++) {
     std::ifstream File;
     File.open(txts[i].c_str());
-    std::vector<int> RGain, EGain;
+    std::vector<double> RGain, EGain;
     std::vector<double> time;
 
     if (File.fail()) {
@@ -90,8 +90,8 @@ void ReadTXTGain(std::string txtfolder, bool draw = 0) {
     std::string name_r = "hRGain_" + txts[i].substr(0, txts[i].size() - 4);
     std::string name_e = "hEGain_" + txts[i].substr(0, txts[i].size() - 4);
 
-    TH1I* hRGain = new TH1I(name_r.c_str(), "Real Gain", nBins, hmin, hmaxR);
-    TH1I* hEGain = new TH1I(name_e.c_str(), "Effective Gain", nBins, hmin, hmaxE);
+    TH1F* hRGain = new TH1F(name_r.c_str(), "Real Gain", nBins, hmin, hmaxR);
+    TH1F* hEGain = new TH1F(name_e.c_str(), "Effective Gain", nBins, hmin, hmaxE);
     TH1F* hT = new TH1F("Time", "Time", nBins, hmin, hmaxT);
 
     for (int i = 0; i < RGain.size(); i++) {
@@ -385,6 +385,69 @@ void PlotMesh(ComponentElmer* Elm, double info[9]) {
 
   std::string image = "mesh.pdf";
   cGeo -> SaveAs(image.c_str());
+}
+
+
+void PM(ComponentElmer *Elm, double DIST = 0.014) {
+  TCanvas *cGeo = new TCanvas("geo", "Geometry");
+  ViewFEMesh* vFE = new ViewFEMesh();
+
+  const double H = sqrt(3) * DIST / 2;
+  const double Z = 0.005;
+
+  vFE -> SetCanvas(cGeo);
+  vFE -> SetComponent(Elm);
+  vFE -> SetPlane(0, -1, 0, 0, 0, 0);
+  vFE -> SetFillMesh(true);
+  vFE -> SetColor(0, kCyan - 3);
+  vFE -> SetColor(1, kOrange + 7);
+  vFE -> SetColor(2, kOrange + 7);
+  vFE -> EnableAxes();
+  vFE -> SetXaxisTitle("x (cm)");
+  vFE -> SetYaxisTitle("z (cm)");
+  vFE -> SetArea(-0.5 * DIST, -Z, -1., 0., Z, 1.);
+  vFE -> Plot();
+
+  std::string image = "meshtri.png";
+  cGeo -> SaveAs(image.c_str());
+}
+
+
+void EF(ComponentElmer *Elm, double Z, double DIST = 0.014) {
+  TCanvas* cFie = new TCanvas("fie", "Field");
+  ViewField* vF = new ViewField();
+
+  const double H = sqrt(3) * DIST / 2;
+
+  vF -> SetCanvas(cFie);
+  vF -> SetComponent(Elm);
+  vF -> SetNumberOfContours(80);
+  vF -> SetPlane(0, -1, 0, 0, 0, 0);
+  vF -> SetArea(-3 * DIST, -0.2 * Z, 3 * DIST, 0.2 * Z);
+  vF -> SetElectricFieldRange(0., 100000.);
+  vF -> PlotContour("e");
+
+  std::string image = "field.pdf";
+  cFie -> SaveAs(image.c_str());
+}
+
+
+void EProfile(ComponentElmer *Elm, double Z, double DIST = 0.014) {
+  // Stolen from Geovane's tutorial
+  TCanvas* eProfileElectricField = new TCanvas("Profile", "Profile");
+  ViewField * pf = new ViewField();
+
+  const double H = sqrt(3) * DIST / 2;
+  pf -> SetComponent(Elm);
+  pf -> SetArea(-1 * DIST, -0.2 * Z, 1.5 * DIST, 0.2 * Z);
+  //pf -> SetNumberOfContours(40);
+  pf -> SetPlane(0, 1, 0, H, H, 0);
+  pf -> SetCanvas(eProfileElectricField);
+  pf -> SetElectricFieldRange(0., 100000.);
+  pf -> PlotContour("e");
+
+  std::string image = "profilefield.pdf";
+  eProfileElectricField  -> SaveAs(image.c_str());
 }
 
 
