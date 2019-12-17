@@ -8,21 +8,19 @@ using namespace Garfield;
 int main(int argc, char * argv[]) {
   clock_t begin_time = clock();
 
-  std::string GEM = "../gem70_140_420";   // GEM folder
+  std::string GEM = "../gem_example";   // GEM folder
+
 
   // GEM Setup
-  std::vector<float> g = SetupInfo(GEM);
   ComponentElmer* elm = LoadGas(GEM, 70.);    // 70% Ar, 30% CO2
+  double ZMAX = 0.103;
+  double delta = 0.001;
 
 
-  // Initial Parameters for Track
-  const double Center = (g[2] - g[3]) / 2;
-  const double Z_AXIS = -1 * (g[3] + g[4] / 2 + g[5]) - Center;
-  const double H = sqrt(3) * g[1] / 2;
   // Position
-  const double x0 = (2 * RndmUniform() - 1) * g[1] / 2;
-  const double y0 = (2 * RndmUniform() - 1) * H / 2;
-  const double z0 = g[4] / 2 + g[5] + g[2] - 0.001 - Center;
+  double x0 = 0.014 * (2 * RndmUniform() - 1);
+  double y0 = 0.014 * (2 * RndmUniform() - 1);
+  const double z0 = ZMAX - delta;
   // Time
   const double t0 = 0., tEnd = 120.;
   const int nTimeBins = 100;
@@ -36,7 +34,7 @@ int main(int argc, char * argv[]) {
   Sensor* sensor = new Sensor();
   sensor -> AddComponent(elm);
   sensor -> AddElectrode(elm, "WT");
-  sensor -> SetArea(-4 * g[2], -4 * H, Z_AXIS, 4 * g[2], 4 * H, z0);
+  sensor -> SetArea(-10, -10, -ZMAX, 10, 10, ZMAX);
   sensor -> SetTimeWindow(t0, (tEnd - t0) / nTimeBins, nTimeBins);
 
   // Pion Track Setup
@@ -80,7 +78,7 @@ int main(int argc, char * argv[]) {
         int status;
         aval -> GetElectronEndpoint(k, xe2, ye2, ze2, te2, e2,
                                     xe3, ye3, ze3, te3, e3, status);
-        if (ze3 <= Z_AXIS + 0.001) {  // Added a delta to minimize border effects
+        if (ze3 <= -ZMAX + delta) {  // Added a delta to minimize border effects
           nf += 1;
         }
       }

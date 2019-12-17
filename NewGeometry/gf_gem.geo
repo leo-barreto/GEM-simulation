@@ -24,6 +24,9 @@ TDIE = POSDIE[0] - POSDIE[NDIE - 1];  // Thickness of dieletric
 DRI = .3;                      // Size of drift region
 IND = .1;                      // Size of induction region
 
+// Mesh Quality
+lC_CHA = 0.1;
+
 
 Function gf_gem
 
@@ -102,7 +105,7 @@ Function gf_gem
 
 
   // Chamber
-  ZTOP = Z + TDIE / 2 + TPLA1 + DRI; ZBOT = Z - TDIE / 2 - TPLA2 - IND; lc = 0.05;
+  ZTOP = Z + TDIE / 2 + TPLA1 + DRI; ZBOT = Z - TDIE / 2 - TPLA2 - IND; lc = LC_CHA;
   pC1 = newp; Point(pC1) = {X1, Y1, ZTOP, lc}; // Mid Up-Left
   pC2 = newp; Point(pC2) = {X4, Y1, ZTOP, lc}; // Mid Up-Right
   pC3 = newp; Point(pC3) = {X4, Y4, ZTOP, lc}; // Mid Down-Right

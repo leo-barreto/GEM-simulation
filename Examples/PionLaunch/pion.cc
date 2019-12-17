@@ -13,7 +13,7 @@ int main(int argc, char * argv[]) {
   //TApplication app("app", &argc, argv);
   clock_t begin_time = clock();
 
-  std::string GEM = "../gem70_140_420";   // GEM folder
+  std::string GEM = "../gem_example";   // GEM folder
   std::string TXTION = "ion.txt";    // Primary Ionization Output
   std::string TXTELE = "ele.txt";    // Readout Output
 
@@ -27,20 +27,14 @@ int main(int argc, char * argv[]) {
 
 
   // GEM Setup
-  std::vector<float> g = SetupInfo(GEM);
-  double delta = 0.001;
-  double* R = GEMRange(g, delta);
   ComponentElmer* elm = LoadGas(GEM, 70.);    // 70% Ar, 30% CO2
-
-
-  // Initial Parameters for Track
-  const double Center = (g[2] - g[3]) / 2;
-  const double H = sqrt(3) * g[1] / 2;
+  double ZMAX = 0.103;
+  double delta = 0.001;
 
   // Position
-  const double x0 = (2 * RndmUniform() - 1) * g[1] / 2;
-  const double y0 = (2 * RndmUniform() - 1) * H / 2;
-  const double z0 = R[2];
+  double x0 = 0.014 * (2 * RndmUniform() - 1);
+  double y0 = 0.014 * (2 * RndmUniform() - 1);
+  const double z0 = ZMAX - delta;
 
 
   // Time
@@ -54,12 +48,12 @@ int main(int argc, char * argv[]) {
   // Sensor
   Sensor* sensor = new Sensor();
   sensor -> AddComponent(elm);
-  sensor -> SetArea(-10, -10, -R[2] - delta, 10, 10, R[2] + delta);
+  sensor -> SetArea(-10, -10, -ZMAX, 10, 10, ZMAX);
 
 
   // Drift Visualization
   ViewDrift* vDrift = new ViewDrift();
-  vDrift -> SetArea(-10, -10, -R[2] - delta, 10, 10, R[2] + delta);
+  vDrift -> SetArea(-10, -10, -ZMAX, 10, 10, ZMAX);
 
 
   // Pion Track Setup
@@ -146,7 +140,7 @@ int main(int argc, char * argv[]) {
     px = atof(line.substr(0, stop1).c_str());
     py = atof(line.substr(stop1 + 1, stop2 - stop1 - 1).c_str());
     pz = atof(line.substr(stop2 + 1, stop3 - stop2 - 1).c_str());
-    if (pz <= -R[2]) {
+    if (pz <= -ZMAX + delta) {
       PosX.push_back(px);
       PosY.push_back(py);
     }
@@ -178,13 +172,13 @@ int main(int argc, char * argv[]) {
   vFE -> SetComponent(elm);
   vFE -> SetPlane(0, -1, 0, 0, 0, 0);
   vFE -> SetFillMesh(true);
-  vFE -> SetColor(2, kCyan + 1);
+  vFE -> SetColor(0, kCyan - 3);
+  vFE -> SetColor(1, kOrange + 7);
   vFE -> SetColor(2, kOrange + 7);
-  vFE -> SetColor(3, kOrange + 7);
   vFE -> EnableAxes();
   vFE -> SetXaxisTitle("x (cm)");
   vFE -> SetYaxisTitle("z (cm)");
-  vFE -> SetArea(xmin, -R[2] - delta, 0., xmax, R[2] + delta, 0.);
+  vFE -> SetArea(xmin, -ZMAX, 0., xmax, ZMAX, 0.);
   vFE -> SetViewDrift(vDrift);
   vFE -> Plot();
   c1 -> SaveAs("pion.pdf");

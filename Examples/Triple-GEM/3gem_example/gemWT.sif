@@ -1,0 +1,143 @@
+Header
+  CHECK KEYWORDS Warn
+  Mesh DB "." "."
+  Include Path ""
+  Results Directory ""
+End
+
+Simulation
+  Coordinate System = Cartesian 3D
+  Simulation Type = Steady State
+  Steady State Max Iterations = 1
+  Output File = "gemWT.result"
+  Post File = "gemWT.ep"
+End
+
+Constants
+  Permittivity Of Vacuum = 8.8542e-12
+End
+
+Body 1
+  Equation = 1
+  Material = 2
+End
+
+Body 2
+  Equation = 1
+  Material = 3
+End
+
+Body 3
+  Equation = 1
+  Material = 3
+End
+
+Body 4
+  Equation = 1
+  Material = 1
+End
+
+Equation 1
+  Active Solvers(1) = 1
+  Calculate Electric Energy = True
+End
+
+Solver 1
+  Equation = Stat Elec Solver
+  Variable = Potential
+  Variable DOFs = 1
+  Procedure = "StatElecSolve" "StatElecSolver"
+  Calculate Electric Field = True
+  Calculate Electric Flux = False
+  Linear System Solver = Iterative
+  Linear System Iterative Method = BiCGStab
+  Linear System Max Iterations = 1000
+  Linear System Abort Not Converged = True
+  Linear System Convergence Tolerance = 1.0e-10
+  Linear System Preconditioning = ILU1
+  Steady State Convergence Tolerance = 5.0e-7
+End
+
+! Gas
+Material 1
+  Relative Permittivity = 1
+  Density = 1
+End
+
+! Dielectric
+Material 2
+  Relative Permittivity = 3.23
+  Density = 2
+End
+
+! Copper
+Material 3
+  Relative Permittivity = 1.0e10
+  Density = 3
+End
+
+
+! Periodicity in Y
+Boundary Condition 1
+  Target Boundaries = 1
+End
+
+Boundary Condition 2
+  Target Boundaries = 3
+  Periodic BC = 1
+  Periodic BC Potential = Logical True
+End
+
+
+! Periodicity in X
+Boundary Condition 3
+  Target Boundaries = 2
+End
+
+Boundary Condition 4
+  Target Boundaries = 4
+  Periodic BC = 3
+  Periodic BC Potential = Logical True
+End
+
+
+! Potential definitions
+Boundary Condition 5
+    Target Boundaries = 5
+    Potential = 0
+End
+
+Boundary Condition 6
+    Target Boundaries = 6
+    Potential = 0
+End
+
+Boundary Condition 7
+    Target Boundaries = 7
+    Potential = 0
+End
+
+Boundary Condition 8
+    Target Boundaries = 8
+    Potential = 0
+End
+
+Boundary Condition 9
+    Target Boundaries = 9
+    Potential = 0
+End
+
+Boundary Condition 10
+    Target Boundaries = 10
+    Potential = 0
+End
+
+Boundary Condition 11
+    Target Boundaries = 11
+    Potential = 0
+End
+
+Boundary Condition 12
+    Target Boundaries = 12
+    Potential = 1
+End

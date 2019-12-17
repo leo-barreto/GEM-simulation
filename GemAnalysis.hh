@@ -388,12 +388,9 @@ void PlotMesh(ComponentElmer* Elm, double info[9]) {
 }
 
 
-void PM(ComponentElmer *Elm, double DIST = 0.014) {
+void PM(ComponentElmer *Elm, double ZMAX, double DIST = 0.014) {
   TCanvas *cGeo = new TCanvas("geo", "Geometry");
   ViewFEMesh* vFE = new ViewFEMesh();
-
-  const double H = sqrt(3) * DIST / 2;
-  const double Z = 0.005;
 
   vFE -> SetCanvas(cGeo);
   vFE -> SetComponent(Elm);
@@ -405,7 +402,7 @@ void PM(ComponentElmer *Elm, double DIST = 0.014) {
   vFE -> EnableAxes();
   vFE -> SetXaxisTitle("x (cm)");
   vFE -> SetYaxisTitle("z (cm)");
-  vFE -> SetArea(-0.5 * DIST, -Z, -1., 0., Z, 1.);
+  vFE -> SetArea(-0.5 * DIST, -ZMAX, -1., 0., ZMAX, 1.);
   vFE -> Plot();
 
   std::string image = "meshtri.png";
@@ -413,7 +410,7 @@ void PM(ComponentElmer *Elm, double DIST = 0.014) {
 }
 
 
-void EF(ComponentElmer *Elm, double Z, double DIST = 0.014) {
+void EF(ComponentElmer *Elm, double ZMAX, double DIST = 0.014) {
   TCanvas* cFie = new TCanvas("fie", "Field");
   ViewField* vF = new ViewField();
 
@@ -423,7 +420,7 @@ void EF(ComponentElmer *Elm, double Z, double DIST = 0.014) {
   vF -> SetComponent(Elm);
   vF -> SetNumberOfContours(80);
   vF -> SetPlane(0, -1, 0, 0, 0, 0);
-  vF -> SetArea(-3 * DIST, -0.2 * Z, 3 * DIST, 0.2 * Z);
+  vF -> SetArea(-3 * DIST, -0.2 * ZMAX, 3 * DIST, 0.2 * ZMAX);
   vF -> SetElectricFieldRange(0., 100000.);
   vF -> PlotContour("e");
 
@@ -432,14 +429,14 @@ void EF(ComponentElmer *Elm, double Z, double DIST = 0.014) {
 }
 
 
-void EProfile(ComponentElmer *Elm, double Z, double DIST = 0.014) {
+void EProfile(ComponentElmer *Elm, double ZMAX, double DIST = 0.014) {
   // Stolen from Geovane's tutorial
   TCanvas* eProfileElectricField = new TCanvas("Profile", "Profile");
   ViewField * pf = new ViewField();
 
   const double H = sqrt(3) * DIST / 2;
   pf -> SetComponent(Elm);
-  pf -> SetArea(-1 * DIST, -0.2 * Z, 1.5 * DIST, 0.2 * Z);
+  pf -> SetArea(-1 * DIST, -0.2 * ZMAX, 1.5 * DIST, 0.2 * ZMAX);
   //pf -> SetNumberOfContours(40);
   pf -> SetPlane(0, 1, 0, H, H, 0);
   pf -> SetCanvas(eProfileElectricField);

@@ -6,12 +6,13 @@ import time
 GEN_SETUP = True
 GEN_GEOMETRY = True
 GEN_FIELDS = True
+# Still deciding if I'll implement the results on the GEM folder
 GEN_ROOT = False
 
 
 # ======================= START OF USER INPUT =======================
 # Parameters
-FOLDER_NAME = 'gem_exemplo'
+FOLDER_NAME = 'gem_example'
 NTOT = 2    # Only Single-GEM for now, remove this when fixed
 SHIFT_X = [0]
 SHIFT_Y = [0]
@@ -40,6 +41,9 @@ E_INDUCTION = 5000
 DELTA_V = [420]
 POTENTIALS = []
 PERMITTIVITY_DIE = 3.23 # relative
+
+# Mesh Quality on Chambers (near GEM is fixed on DISTANCE_HOLES / 15)
+LC_CHA = 0.1;
 # ======================= END OF USER INPUT =======================
 
 
@@ -135,6 +139,7 @@ if GEN_GEOMETRY:
         # Regions
         geo_file.write('DRI = ' + str(ele[i]) + ';\n')
         geo_file.write('IND = ' + str(pad[i]) + ';\n')
+        geo_file.write('lC_CHA = ' + str(LC_CHA) + ';\n')
         geo_file.write('Call gf_gem;')
         geo_file.close()
 
@@ -162,9 +167,9 @@ if GEN_GEOMETRY:
         os.system('ElmerGrid 14 2 ' + geo_name + '.msh -out ' + FOLDER_NAME +' -autoclean -centralize')
 
     print('\nDeleting Files and Folders...')
-    # os.system('rm ' + ' '.join([x + '.geo' for x in geos]))
-    # os.system('rm ' + ' '.join([x + '.msh' for x in geos]))
-    # os.system('rm -r ' + ' '.join([x for x in geos]))
+    os.system('rm ' + ' '.join([x + '.geo' for x in geos]))
+    os.system('rm ' + ' '.join([x + '.msh' for x in geos]))
+    os.system('rm -r ' + ' '.join([x for x in geos]))
 
 
 if GEN_FIELDS:
@@ -204,7 +209,8 @@ Simulation
   Output File = "gem.result"
   Post File = "gem.ep"
 End
-    '''
+
+'''
     headerWT = '''Header
   CHECK KEYWORDS Warn
   Mesh DB "." "."
@@ -219,7 +225,8 @@ Simulation
   Output File = "gemWT.result"
   Post File = "gemWT.ep"
 End
-    '''
+
+'''
     sif_str = '''Constants
   Permittivity Of Vacuum = 8.8542e-12
 End
@@ -244,6 +251,11 @@ Body 4
   Material = 1
 End
 
+Equation 1
+  Active Solvers(1) = 1
+  Calculate Electric Energy = True
+End
+
 Solver 1
   Equation = Stat Elec Solver
   Variable = Potential
@@ -263,16 +275,19 @@ End
 ! Gas
 Material 1
   Relative Permittivity = 1
+  Density = 1
 End
 
 ! Dielectric
 Material 2
   Relative Permittivity = ''' + str(PERMITTIVITY_DIE) + '''
+  Density = 2
 End
 
 ! Copper
 Material 3
   Relative Permittivity = 1.0e10
+  Density = 3
 End
 
 
@@ -328,5 +343,4 @@ End
 
 
 time = time.time() - start
-print(potentials)
 print('\n\nDONE! (in %.2f seconds)' % time)

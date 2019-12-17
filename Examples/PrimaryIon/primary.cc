@@ -10,6 +10,7 @@ int main(int argc, char * argv[]) {
   std::string rootname = "results.root";
   double DRIFT = 0.3;    // Drift zone size
   double ZMAX = 0.203;   // Starting position of photon (pad is at -ZMAX)
+  double delta = 0.001;
   int NEVENTS = 10000;
   // This calculation is made for a fixed energy, if you desire to simulate
   // photons from a source Fe55, use the function Fe55()
@@ -58,7 +59,7 @@ int main(int argc, char * argv[]) {
     int ntot = 0, nel = 0;    //  Number of total detected electrons and primary electrons
 
     while (nel == 0) {
-      track -> TransportPhoton(x0, y0, ZMAX - 0.0001, 0., ENERGY, 0, 0, -1, nel);
+      track -> TransportPhoton(x0, y0, ZMAX - delta, 0., ENERGY, 0, 0, -1, nel);
     }
 
     hEle -> Fill(nel);
@@ -84,7 +85,7 @@ int main(int argc, char * argv[]) {
           aval -> GetElectronEndpoint(k, xe2, ye2, ze2, te2, e2,
                                       xe3, ye3, ze3, te3, e3, status);
 
-          if (ze3 <= -ZMAX + 0.0001) {  // Added a delta to minimize border effects
+          if (ze3 <= -ZMAX + delta) {  // Added a delta to minimize border effects
             nf += 1;
           }
         }
