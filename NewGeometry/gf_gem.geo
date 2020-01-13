@@ -18,7 +18,6 @@ TPLA2 = 0.005;          // Thickness of lower plate
 NDIE = 3;                      // Number of dieletric planes
 POSDIE = {0.025, 0, -0.025};   // Positions of dieletric planes
 RDIE = {0.035, 0.025, 0.035};  // Radius of each dieletric plane
-TDIE = POSDIE[0] - POSDIE[NDIE - 1];  // Thickness of dieletric
 
 // Chamber
 DRI = .3;                      // Size of drift region
@@ -30,6 +29,7 @@ lC_CHA = 0.1;
 
 Function gf_gem
 
+  TDIE = POSDIE[0] - POSDIE[NDIE - 1];  // Thickness of dieletric
   X0 = X; Y0 = Y;
 
   // If there is any "ring border" on plates, more surfaces are necessary to

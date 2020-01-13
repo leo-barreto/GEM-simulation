@@ -139,7 +139,7 @@ if GEN_GEOMETRY:
         # Regions
         geo_file.write('DRI = ' + str(ele[i]) + ';\n')
         geo_file.write('IND = ' + str(pad[i]) + ';\n')
-        geo_file.write('lC_CHA = ' + str(LC_CHA) + ';\n')
+        geo_file.write('LC_CHA = ' + str(LC_CHA) + ';\n')
         geo_file.write('Call gf_gem;')
         geo_file.close()
 
@@ -167,7 +167,7 @@ if GEN_GEOMETRY:
         os.system('ElmerGrid 14 2 ' + geo_name + '.msh -out ' + FOLDER_NAME +' -autoclean -centralize')
 
     print('\nDeleting Files and Folders...')
-    os.system('rm ' + ' '.join([x + '.geo' for x in geos]))
+    #os.system('rm ' + ' '.join([x + '.geo' for x in geos]))
     os.system('rm ' + ' '.join([x + '.msh' for x in geos]))
     os.system('rm -r ' + ' '.join([x for x in geos]))
 
