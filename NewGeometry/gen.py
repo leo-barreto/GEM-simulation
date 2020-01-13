@@ -13,7 +13,7 @@ GEN_ROOT = False
 # ======================= START OF USER INPUT =======================
 # Parameters
 FOLDER_NAME = 'gem_example'
-NTOT = 2    # Only Single-GEM for now, remove this when fixed
+NTOT = 2
 SHIFT_X = [0]
 SHIFT_Y = [0]
 
@@ -67,9 +67,10 @@ def potential_calculator(regions, fields, deltav, pots):
     else:
         return pots
 
-if GEN_SETUP:
-    start = time.time()
 
+start = time.time()
+if GEN_SETUP:
+    print('\n============== SETUP ==============\n')
 
     # Read user input
     x0 = fill_parameter(SHIFT_X, NTOT)
@@ -106,12 +107,9 @@ if GEN_SETUP:
         else:
             pad.append(regions[i + 1] / 2)
 
-    print(ele)
-    print(pad)
-    print(translate)
-
 
 if GEN_GEOMETRY:
+    print('\n============== GEOMETRY ==============\n')
     geos = []
     # Write .geo scripts
     for i in range(NTOT):
@@ -151,7 +149,7 @@ if GEN_GEOMETRY:
     for i in range(NTOT):
         print('\nSolving for GEM layer [{0} / {1}]...'.format(i + 1, NTOT))
         print('\nMeshing Geometry...')
-        os.system('gmsh ' + geos[i] + '.geo -3 -order 2 -optimize')
+        os.system('gmsh ' + geos[i] + '.geo -3 -order 2')
         print('\nConverting to Elmer...')
         os.system('ElmerGrid 14 2 ' + geos[i] + '.msh')
 
@@ -167,12 +165,13 @@ if GEN_GEOMETRY:
         os.system('ElmerGrid 14 2 ' + geo_name + '.msh -out ' + FOLDER_NAME +' -autoclean -centralize')
 
     print('\nDeleting Files and Folders...')
-    #os.system('rm ' + ' '.join([x + '.geo' for x in geos]))
+    os.system('rm ' + ' '.join([x + '.geo' for x in geos]))
     os.system('rm ' + ' '.join([x + '.msh' for x in geos]))
     os.system('rm -r ' + ' '.join([x for x in geos]))
 
 
 if GEN_FIELDS:
+    print('\n============== FIELDS ==============\n')
     # SIF Files
     sif_pot = ''
     WTsif_pot = ''

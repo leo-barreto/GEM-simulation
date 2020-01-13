@@ -129,23 +129,23 @@ Function gf_gem
   lC12 = newl; Line(lC12) = {pC4, pC8};
 
   lp1 = newll; Line Loop(lp1) = {lC1, lC2, lC3, lC4};
-  s1 = news; Plane Surface(s1) = {lp1};             // +Z
+  s1 = news; Plane Surface(s1) = {lp1};               // +Z
   lp2 = newll; Line Loop(lp2) = {lC5, lC6, lC7, lC8};
-  s2 = news; Plane Surface(s2) = {lp2};             // -Z
+  s2 = news; Plane Surface(s2) = {lp2};               // -Z
   lp3 = newll; Line Loop(lp3) = {lC1, lC10, -lC5, -lC9};
-  s3 = news; Plane Surface(s3) = {lp3, bnd_ll1[]};  // +Y
+  s3 = news; Plane Surface(s3) = {lp3, bnd_ll1[]};    // +Y
   lp4 = newll; Line Loop(lp4) = {lC2, lC11, -lC6, -lC10};
-  s4 = news; Plane Surface(s4) = {lp4, bnd_ll2[]};  // +X
+  s4 = news; Plane Surface(s4) = {lp4, bnd_ll2[]};    // +X
   lp5 = newll; Line Loop(lp5) = {lC3, lC12, -lC7, -lC11};
-  s5 = news; Plane Surface(s5) = {lp5, bnd_ll3[]};  // -Y
+  s5 = news; Plane Surface(s5) = {lp5, bnd_ll3[]};    // -Y
   lp6 = newll; Line Loop(lp6) = {lC4, lC9, -lC8, -lC12};
-  s6 = news; Plane Surface(s6) = {lp6, bnd_ll4[]};  // -X
+  s6 = news; Plane Surface(s6) = {lp6, bnd_ll4[]};    // -X
 
 
   // Boundaries
   // Index must be fixed for multigem
   index_fixed = 100000;
-  Physical Surface(index_fixed) = {s3, bnd_s1[]}; // +Y
+  Physical Surface(index_fixed) = {s3, bnd_s1[]};     // +Y
   Physical Surface(index_fixed + 1) = {s4, bnd_s2[]}; // +X
   Physical Surface(index_fixed + 2) = {s5, bnd_s3[]}; // -Y
   Physical Surface(index_fixed + 3) = {s6, bnd_s4[]}; // -X
@@ -154,11 +154,11 @@ Function gf_gem
   // Physical Surfaces (Potential)
   idreg = 2 * index_fixed + 8 * ID;
   If (ID == 0)
-    Physical Surface(idreg) = {s1};   // +Z
+    Physical Surface(idreg) = {s1};       // +Z
     Printf("Part of the first detector layer");
   EndIf
-  Physical Surface(idreg + 1) = slup[]; // Upper Plate
-  Physical Surface(idreg + 2) = sllo[]; // Lower Plate
+  Physical Surface(idreg + 1) = slup[];   // Upper Plate
+  Physical Surface(idreg + 2) = sllo[];   // Lower Plate
   If (ID == NTOT - 1)
     Physical Surface(idreg + 3) = {s2};   // -Z
     Printf("Part of the last detector layer");
@@ -195,7 +195,7 @@ Function gf_gem
   Physical Volume(index_v + 3) = {vchamber};
 
 
-  // Help to to visualize each volume
+  // Help to visualize each volume
   Color Orange {Volume{vup, vlo};}
   Color Grey {Volume{vdie_a[]};}
   Color Green {Volume{vchamber};}

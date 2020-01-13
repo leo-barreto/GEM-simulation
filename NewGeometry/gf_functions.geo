@@ -11,10 +11,10 @@ bnd_ll2 = {}; // +X
 bnd_ll3 = {}; // -Y
 bnd_ll4 = {}; // -X
 
-bnd_s1 = {}; // +Y
-bnd_s2 = {}; // +X
-bnd_s3 = {}; // -Y
-bnd_s4 = {}; // -X
+bnd_s1 = {};  // +Y
+bnd_s2 = {};  // +X
+bnd_s3 = {};  // -Y
+bnd_s4 = {};  // -X
 
 
 
@@ -31,15 +31,15 @@ Function gf_plane
   Y4 = Y0 - Sqrt(3) * D / 2;
 
   // Points starting from superior left corner and rotating clockwise
-  p1 = newp; Point(p1) = {X1, Y1, Z0, lc}; // Mid Up-Left
+  p1 = newp; Point(p1) = {X1, Y1, Z0, lc};   // Mid Up-Left
   p2 = newp; Point(p2) = {X2, Y1, Z0, lc};
   p3 = newp; Point(p3) = {X3, Y1, Z0, lc};
 
-  p4 = newp; Point(p4) = {X4, Y1, Z0, lc}; // Mid Up-Right
+  p4 = newp; Point(p4) = {X4, Y1, Z0, lc};   // Mid Up-Right
   p5 = newp; Point(p5) = {X4, Y2, Z0, lc};
   p6 = newp; Point(p6) = {X4, Y3, Z0, lc};
 
-  p7 = newp; Point(p7) = {X4, Y4, Z0, lc}; // Mid Down-Right
+  p7 = newp; Point(p7) = {X4, Y4, Z0, lc};   // Mid Down-Right
   p8 = newp; Point(p8) = {X3, Y4, Z0, lc};
   p9 = newp; Point(p9) = {X2, Y4, Z0, lc};
 
@@ -149,9 +149,7 @@ Function Loops
   lo_holell = newll; Line Loop(lo_holell) = {lmin + 20, lmin + 21, lmin + 22,
                                              lmin + 23};
   up_gemplane = news; Plane Surface(up_gemplane) = {up_outerll, up_holell};
-  //up_holeplane = news; Surface(up_holeplane) = {up_holell};
   lo_gemplane = news; Plane Surface(lo_gemplane) = {lo_outerll, lo_holell};
-  //lo_holeplane = news; Surface(lo_holeplane) = {lo_holell};
 
 
   // Surfaces Loops
@@ -166,9 +164,7 @@ Function Loops
   gemv = newv; Volume(gemv) = {sl};
 
   outsideloops = {};
-  //outsideloops += {up_gemplane};
   outsideloops += outholes[];
   outsideloops += hloops[];
-  //outsideloops += {lo_gemplane};
 
 Return
